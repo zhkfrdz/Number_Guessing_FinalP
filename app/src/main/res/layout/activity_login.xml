@@ -93,7 +93,7 @@
         android:backgroundTint="#FF6B4A"
         android:elevation="4dp"
         android:radius="20dp"
-        android:text="Start Game"
+        android:text="Log In"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold" />
