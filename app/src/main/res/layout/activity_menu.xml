@@ -19,44 +19,67 @@
             android:layout_height="wrap_content"
             android:text="Hello, User!"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:layout_alignParentStart="true" />
+            android:textSize="16sp" />
 
         <ImageView
             android:id="@+id/settings_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/ic_settings"
             android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_settings"
             android:contentDescription="Settings" />
     </RelativeLayout>
 
-    <!-- Title Section with Cat -->
+    <!-- Title Section: Cat + Text -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginBottom="24dp">
+        android:layout_marginBottom="32dp">
 
         <ImageView
             android:id="@+id/cat_character"
-            android:layout_width="140dp"
-            android:layout_height="160dp"
-            android:contentDescription="Cat character"
-            android:src="@drawable/cat" />
-    </LinearLayout>
+            android:layout_width="160dp"
+            android:layout_height="180dp"
+            android:src="@drawable/cat"
+            android:contentDescription="Cat character" />
 
-    <!-- Game Title -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="GUESS THE NUMBER"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="16dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/rubikmono"
+                android:text="GUESS"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="THE"
+                android:textColor="#FFFFFF"
+                android:textSize="28sp"
+                android:fontFamily="@font/rubikmono"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NUMBER"
+                android:textColor="#FF6B4A"
+                android:textSize="28sp"
+                android:fontFamily="@font/dynapuff_regular"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
 
     <!-- Lives (Hearts + Label Below) -->
     <LinearLayout
@@ -103,10 +126,13 @@
             android:layout_marginTop="8dp" />
     </LinearLayout>
 
-    <!-- Start Button (Orange) -->
+    <!-- Start Button -->
+
+    <!-- Stats -->
+
     <Button
         android:id="@+id/start_button"
-        android:layout_width="match_parent"
+        android:layout_width="379dp"
         android:layout_height="56dp"
         android:layout_marginBottom="32dp"
         android:backgroundTint="#FF6B4A"
@@ -115,7 +141,6 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- Stats -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -126,6 +151,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/dynapuff_medium"
             android:text="STATS"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
@@ -143,6 +169,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/portlligatsans_regular"
                 android:text="Total Games:"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp" />
@@ -166,6 +193,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/portlligatsans_regular"
                 android:text="Total Wins:"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp" />
@@ -189,6 +217,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:fontFamily="@font/portlligatsans_regular"
                 android:text="Total Loss:"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp" />
@@ -212,6 +241,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Winrate:"
+                android:fontFamily="@font/portlligatsans_regular"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp" />
 
