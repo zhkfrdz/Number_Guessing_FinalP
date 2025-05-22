@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#000000"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="32dp">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:layout_gravity="start"
+            android:tint="#FFFFFF"
+            android:layout_marginTop="8dp"/>
+
+        <TextView
+            android:id="@+id/tvChooseLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="32dp"
+            android:fontFamily="@font/audiowide"
+            android:text="CHOOSE LEVEL"
+            android:textColor="#fff"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select your challenge"
+            android:textColor="#888"
+            android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"/>
+
+        <!-- EASY -->
+        <LinearLayout
+            android:id="@+id/cardEasy"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="48dp"
+            android:background="@drawable/card_border_orange"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvEasy"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/audiowide"
+                    android:text="EASY"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/tvEasyRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1-10 range"
+                    android:textColor="#888"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badgeEasy"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/circle_orange"
+                android:gravity="center"
+                android:text="1"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:fontFamily="@font/audiowide" />
+        </LinearLayout>
+
+        <!-- MEDIUM -->
+        <LinearLayout
+            android:id="@+id/cardMedium"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal"
+            android:background="@drawable/card_border_orange"
+            android:gravity="center_vertical"
+            android:padding="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/audiowide"
+                    android:text="MEDIUM"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/tvMediumRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1-50 range"
+                    android:textColor="#888"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badgeMedium"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:gravity="center"
+                android:text="2"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:fontFamily="@font/audiowide"
+                android:background="@drawable/circle_orange"/>
+        </LinearLayout>
+
+        <!-- HARD -->
+        <LinearLayout
+            android:id="@+id/cardHard"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/card_border_orange"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvHard"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/audiowide"
+                    android:text="HARD"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/tvHardRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1-100 range"
+                    android:textColor="#888"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badgeHard"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/circle_orange"
+                android:gravity="center"
+                android:text="3"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:fontFamily="@font/audiowide" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView> 
