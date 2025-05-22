@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:padding="24dp">
+
+    <!-- Settings Icon at Top Right -->
+    <ImageView
+        android:id="@+id/settings_icon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_settings"
+        android:contentDescription="Settings"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp" />
+
+    <!-- Main Content Centered -->
+    <LinearLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_centerInParent="true">
+
+        <!-- Game Over Image and Text -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <ImageView
+                android:layout_width="180dp"
+                android:layout_height="180dp"
+                android:src="@drawable/gameovercat"
+                android:contentDescription="Game Over Cats" />
+
+            <!-- NO LIVES LEFT Text -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="NO"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF3D3D"
+                    android:fontFamily="@font/p2p" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LIVES"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF3D3D"
+                    android:fontFamily="@font/p2p" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LEFT"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#FF3D3D"
+                    android:fontFamily="@font/p2p" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Hearts Row -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_emptyheart"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Empty Heart" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_emptyheart"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Empty Heart" />
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_emptyheart"
+                android:contentDescription="Empty Heart" />
+        </LinearLayout>
+
+        <!-- Try Again Button -->
+        <Button
+            android:id="@+id/try_again_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:backgroundTint="#FF6B4A"
+            android:text="Try Again"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</RelativeLayout>
