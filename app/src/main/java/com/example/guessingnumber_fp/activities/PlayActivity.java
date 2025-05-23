@@ -1,6 +1,7 @@
 package com.example.guessingnumber_fp.activities;
 
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,6 +38,7 @@ public class PlayActivity extends AppCompatActivity {
     EditText etGuess;
     ImageView heart1, heart2, heart3;
     Button btnGuess, btnGiveUp, btnHint;
+    ImageButton btnTryAgain;
     Handler handler = new Handler();
 
     SharedPreferences prefs;
@@ -63,6 +65,7 @@ public class PlayActivity extends AppCompatActivity {
         btnGuess = findViewById(R.id.btnGuess);
         btnGiveUp = findViewById(R.id.btnGiveUp);
         btnHint = findViewById(R.id.btnHintButton);
+        btnTryAgain = findViewById(R.id.btnTryAgain);
 
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
 
@@ -80,6 +83,12 @@ public class PlayActivity extends AppCompatActivity {
         btnGuess.setOnClickListener(v -> checkGuess());
         btnGiveUp.setOnClickListener(v -> giveUp());
         btnHint.setOnClickListener(v -> useHint());
+        btnTryAgain.setOnClickListener(v -> startNewGame());
+    }
+
+    private boolean isSoundOn() {
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        return prefs.getBoolean("sound_on", true);
     }
 
     private void startNewGame() {
@@ -90,14 +99,25 @@ public class PlayActivity extends AppCompatActivity {
         updateHearts();
         tvHint.setText("HINTS: " + hints);
         etGuess.setText("");
-        gamesPlayed++;
+        hasGuessedThisRound = false;
+        btnTryAgain.setVisibility(View.GONE);
+        tvLevel.setText(difficulty.toUpperCase() + " LEVEL");
+        btnGuess.setEnabled(true);
+        btnGuess.setClickable(true);
+        btnHint.setEnabled(true);
+        btnHint.setClickable(true);
+        btnGiveUp.setEnabled(true);
+        btnGiveUp.setClickable(true);
+        originalRangeMessage = "We are thinking of a number between 1 and " + difficultyMax;
+        tvRange.setText(originalRangeMessage);
     }
 
     private void useHint() {
-        if (hints > 0) {
+        if (hints > 0 && hasGuessedThisRound) {
             hints--;
             hintsUsed++;
-            prefs.edit().putInt("hints_used_" + difficulty, hintsUsed).apply();
+            String currentUser = prefs.getString("current_user", "guest");
+            prefs.edit().putInt("hints_used_" + difficulty + "_" + currentUser, prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0) + 1).apply();
             tvHint.setText("HINTS: " + hints);
 
             // Get a random hint message
@@ -144,42 +164,62 @@ public class PlayActivity extends AppCompatActivity {
         }
     }
 
+    private boolean hasGuessedThisRound = false;
+    
     private void checkGuess() {
         String guessStr = etGuess.getText().toString();
         if (guessStr.isEmpty()) return;
         int guess = Integer.parseInt(guessStr);
+        if (!hasGuessedThisRound) {
+            // This is the first guess of the round, increment games played
+            String currentUser = prefs.getString("current_user", "guest");
+            prefs.edit().putInt("games_played_" + difficulty + "_" + currentUser, prefs.getInt("games_played_" + difficulty + "_" + currentUser, 0) + 1).apply();
+        }
+        hasGuessedThisRound = true;
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        String currentUser = prefs.getString("current_user", "guest");
         if (guess == targetNumber) {
             score++;
             hearts = 3;
             updateHearts();
             if (score % 3 == 0) {
                 hints++;
-                prefs.edit().putInt("hints_" + difficulty, hints).apply();
-                Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
+                prefs.edit().putInt("hints_" + difficulty + "_" + currentUser, hints).apply();
+                if (isSoundOn()) {
+                    Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
+                }
             }
             tvHint.setText("HINTS: " + hints);
-            // Save highscore if needed
-            int highscore = prefs.getInt("highscore_" + difficulty, 0);
-            if (score > highscore) {
-                prefs.edit().putInt("highscore_" + difficulty, score).apply();
+            // Save per-user best score if needed
+            int userBest = prefs.getInt("highscore_" + difficulty + "_" + currentUser, 0);
+            if (score > userBest) {
+                prefs.edit().putInt("highscore_" + difficulty + "_" + currentUser, score).apply();
             }
-            // Restore original range message
-            tvRange.setText(originalRangeMessage);
-            // Animation or toast
-            Toast.makeText(this, "Correct! New number.", Toast.LENGTH_SHORT).show();
+            // Update global highscore if needed
+            int globalHighscore = prefs.getInt("highscore_" + difficulty, 0);
+            if (score > globalHighscore) {
+                prefs.edit().putInt("highscore_" + difficulty, score).apply();
+                prefs.edit().putString("highscore_" + difficulty + "_user", currentUser).apply();
+            }
+            // Save games won (correct guesses) per user and difficulty
+            prefs.edit().putInt("games_won_" + difficulty + "_" + currentUser, prefs.getInt("games_won_" + difficulty + "_" + currentUser, 0) + 1).apply();
             targetNumber = random.nextInt(difficultyMax) + 1;
             etGuess.setText("");
         } else {
             hearts--;
             updateHearts();
             if (hearts == 0) {
-                gamesLost++;
-                prefs.edit().putInt("games_lost_" + difficulty, gamesLost).apply();
-                new AlertDialog.Builder(this)
-                        .setTitle("Game Over")
-                        .setMessage("You lost! Score: " + score)
-                        .setPositiveButton("OK", (d, w) -> finish())
-                        .show();
+                int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
+                prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
+
+                tvLevel.setText("GAME OVER");
+                btnGuess.setEnabled(false);
+                btnGuess.setClickable(false);
+                btnHint.setEnabled(false);
+                btnHint.setClickable(false);
+                btnGiveUp.setEnabled(false);
+                btnGiveUp.setClickable(false);
+                btnTryAgain.setVisibility(View.VISIBLE);
             } else {
                 // Show mocking message in tvRange
                 tvRange.setText(getMockingMessage(guess));
@@ -188,13 +228,40 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     private void giveUp() {
-        gamesLost++;
-        prefs.edit().putInt("games_lost_" + difficulty, gamesLost).apply();
-        new AlertDialog.Builder(this)
-                .setTitle("Gave Up")
-                .setMessage("The number was: " + targetNumber)
-                .setPositiveButton("OK", (d, w) -> finish())
-                .show();
+        // Custom confirmation dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Give Up?")
+                .setMessage(hasGuessedThisRound ? 
+                    "Are you sure you want to give up? This will count as a loss." :
+                    "Are you sure you want to give up? This will not affect your stats.")
+                .setPositiveButton("Yes", (dialogInterface, which) -> {
+                    if (hasGuessedThisRound) {
+                        String currentUser = prefs.getString("current_user", "guest");
+                        int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
+                        prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
+                        AlertDialog resultDialog = new AlertDialog.Builder(this)
+                            .setTitle("Gave Up")
+                            .setMessage("The number was: " + targetNumber)
+                            .setPositiveButton("OK", (d, w) -> finish())
+                            .create();
+                        resultDialog.setOnShowListener(dialogInterface1 -> {
+                            resultDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFFFFFFF);
+                        });
+                        resultDialog.show();
+                    } else {
+                        // No guess made: just finish the activity
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .create();
+        
+        dialog.setOnShowListener(dialogInterface -> {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFFFFFFF);
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xFFFFFFFF);
+        });
+        
+        dialog.show();
     }
 
     private void updateHearts() {

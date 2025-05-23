@@ -39,21 +39,40 @@ public class StatsActivity extends AppCompatActivity {
         updateStats();
     }
 
+    /**
+     * Update all stats fields for the selected difficulty.
+     * Handles empty/zero stats gracefully and updates all UI fields.
+     */
     private void updateStats() {
-        int gamesPlayed = prefs.getInt("games_played_" + difficulty, 0);
-        int gamesWon = prefs.getInt("games_won_" + difficulty, 0);
-        int gamesLost = prefs.getInt("games_lost_" + difficulty, 0);
-        int hintsUsed = prefs.getInt("hints_used_" + difficulty, 0);
-        int bestScore = prefs.getInt("highscore_" + difficulty, 0);
+        String currentUser = prefs.getString("current_user", "guest");
+        // Per-user stats
+        int gamesPlayed = prefs.getInt("games_played_" + difficulty + "_" + currentUser, 0);
+        int correctGuesses = prefs.getInt("games_won_" + difficulty + "_" + currentUser, 0);
+        int wrongGuesses = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0);
+        int hintsUsed = prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0);
+        // Best score for user (optional, can show global if desired)
+        int bestScore = prefs.getInt("highscore_" + difficulty + "_" + currentUser, 0);
+        // Global highscore (for display, if you want)
+        // int globalHighscore = prefs.getInt("highscore_" + difficulty, 0);
 
-        ((TextView)findViewById(R.id.tvGamesPlayed)).setText(String.valueOf(gamesPlayed));
-        ((TextView)findViewById(R.id.tvGamesWon)).setText(String.valueOf(gamesWon));
-        ((TextView)findViewById(R.id.tvGamesLost)).setText(String.valueOf(gamesLost));
-        ((TextView)findViewById(R.id.tvHintsUsed)).setText(String.valueOf(hintsUsed));
-        ((TextView)findViewById(R.id.tvBestScore)).setText(String.valueOf(bestScore));
+        TextView tvGamesPlayed = findViewById(R.id.tvGamesPlayed);
+        TextView tvCorrectGuesses = findViewById(R.id.tvGamesWon);
+        TextView tvWrongGuesses = findViewById(R.id.tvGamesLost);
+        TextView tvHintsUsed = findViewById(R.id.tvHintsUsed);
+        TextView tvWinRate = findViewById(R.id.tvWinRate);
+        TextView tvBestScore = findViewById(R.id.tvBestScore);
 
+        tvGamesPlayed.setText(String.valueOf(gamesPlayed));
+        tvCorrectGuesses.setText(String.valueOf(correctGuesses));
+        tvWrongGuesses.setText(String.valueOf(wrongGuesses));
+        tvHintsUsed.setText(String.valueOf(hintsUsed));
         // Calculate win rate
-        int winRate = gamesPlayed > 0 ? (gamesWon * 100) / gamesPlayed : 0;
-        ((TextView)findViewById(R.id.tvWinRate)).setText(winRate + "%");
+        String winRateStr = "0%";
+        if (gamesPlayed > 0) {
+            double winRate = ((double) correctGuesses / (double) gamesPlayed) * 100.0;
+            winRateStr = String.format("%.1f%%", winRate);
+        }
+        tvWinRate.setText(winRateStr);
+        tvBestScore.setText(String.valueOf(bestScore));
     }
 }
