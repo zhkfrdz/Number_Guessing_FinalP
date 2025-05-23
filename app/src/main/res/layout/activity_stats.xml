@@ -105,7 +105,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Games Won"
+                    android:text="Correct Guesses"
                     android:textColor="#FF6B4A"
                     android:textSize="18sp"
                     android:fontFamily="@font/poppins_medium"/>
@@ -140,7 +140,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Games Lost"
+                    android:text="Wrong Guesses"
                     android:textColor="#FF6B4A"
                     android:textSize="18sp"
                     android:fontFamily="@font/poppins_medium"/>
@@ -226,6 +226,7 @@
                     android:layout_marginTop="8dp"/>
             </LinearLayout>
         </androidx.cardview.widget.CardView>
+
 
         <!-- Best Score Card -->
         <androidx.cardview.widget.CardView
