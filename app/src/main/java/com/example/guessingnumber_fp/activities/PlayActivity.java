@@ -95,7 +95,14 @@ public class PlayActivity extends AppCompatActivity {
         targetNumber = random.nextInt(difficultyMax) + 1;
         score = 0;
         hearts = 3;
-        hints = 3; // Set default hints to 3
+        // Set default hints based on difficulty
+        if ("easy".equals(difficulty)) {
+            hints = 3;
+        } else if ("medium".equals(difficulty)) {
+            hints = 5;
+        } else if ("hard".equals(difficulty)) {
+            hints = 10;
+        }
         updateHearts();
         tvHint.setText("HINTS: " + hints);
         etGuess.setText("");
@@ -113,38 +120,48 @@ public class PlayActivity extends AppCompatActivity {
     }
 
     private void useHint() {
-        if (hints > 0 && hasGuessedThisRound) {
-            hints--;
-            hintsUsed++;
-            String currentUser = prefs.getString("current_user", "guest");
-            prefs.edit().putInt("hints_used_" + difficulty + "_" + currentUser, prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0) + 1).apply();
-            tvHint.setText("HINTS: " + hints);
+        if (hints > 0) {
+            if (hasGuessedThisRound) {
+                hints--;
+                hintsUsed++;
+                String currentUser = prefs.getString("current_user", "guest");
+                prefs.edit().putInt("hints_used_" + difficulty + "_" + currentUser, prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0) + 1).apply();
+                tvHint.setText("HINTS: " + hints);
 
-            // Get a random hint message
-            String hintMessage;
-            if (random.nextBoolean()) {
-                // Give a range hint
-                int range = difficultyMax / 4;
-                int lowerBound = (targetNumber / range) * range + 1;
-                int upperBound = lowerBound + range - 1;
-                hintMessage = "The number is between " + lowerBound + " and " + upperBound;
-            } else {
-                // Give a divisibility hint
-                if (targetNumber % 2 == 0) {
-                    hintMessage = "The number is even";
+                // Get a random hint message
+                String hintMessage;
+                if (random.nextBoolean()) {
+                    // Give a range hint
+                    int range = difficultyMax / 4;
+                    int lowerBound = (targetNumber / range) * range + 1;
+                    int upperBound = lowerBound + range - 1;
+                    hintMessage = "The number is between " + lowerBound + " and " + upperBound;
                 } else {
-                    hintMessage = "The number is odd";
+                    // Give a divisibility hint
+                    if (targetNumber % 2 == 0) {
+                        hintMessage = "The number is even";
+                    } else {
+                        hintMessage = "The number is odd";
+                    }
                 }
+                
+                // Show hint message in custom TextView
+                tvHintMessage.setText(hintMessage);
+                tvHintMessage.setVisibility(View.VISIBLE);
+                
+                // Hide the message after 3 seconds
+                handler.postDelayed(() -> {
+                    tvHintMessage.setVisibility(View.GONE);
+                }, 3000);
+            } else {
+                tvHintMessage.setText("Make a guess first!");
+                tvHintMessage.setVisibility(View.VISIBLE);
+                
+                // Hide the message after 2 seconds
+                handler.postDelayed(() -> {
+                    tvHintMessage.setVisibility(View.GONE);
+                }, 2000);
             }
-            
-            // Show hint message in custom TextView
-            tvHintMessage.setText(hintMessage);
-            tvHintMessage.setVisibility(View.VISIBLE);
-            
-            // Hide the message after 3 seconds
-            handler.postDelayed(() -> {
-                tvHintMessage.setVisibility(View.GONE);
-            }, 3000);
         } else {
             tvHintMessage.setText("No hints remaining!");
             tvHintMessage.setVisibility(View.VISIBLE);
