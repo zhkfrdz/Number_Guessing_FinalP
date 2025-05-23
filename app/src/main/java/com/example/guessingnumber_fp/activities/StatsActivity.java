@@ -37,6 +37,20 @@ public class StatsActivity extends AppCompatActivity {
 
         ((ImageButton)findViewById(R.id.btnBackStats)).setOnClickListener(v -> finish());
         updateStats();
+
+        findViewById(R.id.btnResetStats).setOnClickListener(v -> {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putInt("games_played_" + difficulty, 0);
+            editor.putInt("games_won_" + difficulty, 0);
+            editor.putInt("games_lost_" + difficulty, 0);
+            editor.putInt("hints_used_" + difficulty, 0);
+            editor.putInt("highscore_" + difficulty, 0);
+            editor.putInt("total_score_" + difficulty, 0); // if used
+            editor.apply();
+            updateStats();
+            Toast.makeText(this, "Stats reset for " + difficulty, Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     private void updateStats() {
@@ -55,5 +69,23 @@ public class StatsActivity extends AppCompatActivity {
         // Calculate win rate
         int winRate = gamesPlayed > 0 ? (gamesWon * 100) / gamesPlayed : 0;
         ((TextView)findViewById(R.id.tvWinRate)).setText(winRate + "%");
+        int totalScore = prefs.getInt("total_score_" + difficulty, 0);
+        int avgScore = gamesPlayed > 0 ? totalScore / gamesPlayed : 0;
+        ((TextView)findViewById(R.id.tvAverageScore)).setText(String.valueOf(avgScore));
+
+
     }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // No music control here
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // No music control here
+    }
+
+
 }

@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.utils.MusicManager;
+
 
 public class MainActivity extends AppCompatActivity {
     MediaPlayer bgMusic;
@@ -20,9 +22,8 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(0xFF000000);
         setContentView(R.layout.activity_main);
 
-        bgMusic = MediaPlayer.create(this, R.raw.bg_music);
-        bgMusic.setLooping(true);
-        bgMusic.start();
+        MusicManager.start(this, R.raw.bg_music);
+
 
         findViewById(R.id.btnPlay).setOnClickListener(v -> startActivity(new Intent(this, SelectDifficultyActivity.class)));
         findViewById(R.id.btnHighscores).setOnClickListener(v -> startActivity(new Intent(this, HighscoresActivity.class)));
@@ -41,8 +42,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (bgMusic != null) bgMusic.release();
+    protected void onResume() {
+        super.onResume();
+// Only start main music if not already playing it
+        if (!MusicManager.isPlaying(R.raw.bg_music)) {
+            MusicManager.start(this, R.raw.bg_music);
+        }
     }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Don't pause or stop music here
+    }
+
+
+
+
 }

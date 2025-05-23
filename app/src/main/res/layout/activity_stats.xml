@@ -262,5 +262,51 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Average Score"
+                    android:textColor="#FF6B4A"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <TextView
+                    android:id="@+id/tvAverageScore"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="#fff"
+                    android:textSize="36sp"
+                    android:fontFamily="@font/audiowide"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+
+        <Button
+            android:id="@+id/btnResetStats"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reset Stats"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="center_horizontal"/>
+
+
     </LinearLayout>
 </ScrollView>

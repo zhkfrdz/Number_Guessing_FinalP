@@ -6,6 +6,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.utils.MusicManager;
 
 public class SelectDifficultyActivity extends AppCompatActivity {
     @Override
@@ -34,4 +35,23 @@ public class SelectDifficultyActivity extends AppCompatActivity {
         intent.putExtra("max", max);
         startActivity(intent);
     }
-} 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Only start the music if it's not already playing bg_music_2
+        if (!MusicManager.isPlaying(R.raw.bg_music_2)) {
+            MusicManager.start(this, R.raw.bg_music_2);
+        }
+    }
+
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Do NOT pause or stop here to allow continuous playback
+    }
+
+
+}

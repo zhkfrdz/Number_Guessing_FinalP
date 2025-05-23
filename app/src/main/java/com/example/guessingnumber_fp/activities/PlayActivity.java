@@ -10,6 +10,8 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.utils.MusicManager;
+import android.media.MediaPlayer;
 
 public class PlayActivity extends AppCompatActivity {
     int targetNumber, score = 0, hearts = 3, hints = 3, difficultyMax = 50;
@@ -17,20 +19,19 @@ public class PlayActivity extends AppCompatActivity {
     String difficulty = "easy";
     Random random = new Random();
 
-    // Mocking messages arrays
     private final String[] tooLowMessages = {
-        "Wow, aiming that low? Are you even trying?",
-        "That's cute. Add some digits, maybe you'll get close.",
-        "This isn't limbo, you don't have to go that low.",
-        "Did you guess with your eyes closed?",
-        "Colder than your last relationship. Try higher."
+            "Wow, aiming that low? Are you even trying?",
+            "That's cute. Add some digits, maybe you'll get close.",
+            "This isn't limbo, you don't have to go that low.",
+            "Did you guess with your eyes closed?",
+            "Colder than your last relationship. Try higher."
     };
 
     private final String[] tooHighMessages = {
-        "Relax, it's not your ego. Go lower.",
-        "That number is as inflated as your confidence.",
-        "Trying to touch the sun, are we? Bring it down.",
-        "You overshot it like your life goals."
+            "Relax, it's not your ego. Go lower.",
+            "That number is as inflated as your confidence.",
+            "Trying to touch the sun, are we? Bring it down.",
+            "You overshot it like your life goals."
     };
 
     TextView tvLevel, tvRange, tvHint, tvHintMessage;
@@ -40,7 +41,6 @@ public class PlayActivity extends AppCompatActivity {
     Handler handler = new Handler();
 
     SharedPreferences prefs;
-
     private String originalRangeMessage;
 
     @Override
@@ -66,7 +66,6 @@ public class PlayActivity extends AppCompatActivity {
 
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
 
-        // Get difficulty and range from Intent
         difficulty = getIntent().getStringExtra("difficulty");
         difficultyMax = getIntent().getIntExtra("max", 10);
         String levelText = "EASY";
@@ -79,18 +78,17 @@ public class PlayActivity extends AppCompatActivity {
 
         btnGuess.setOnClickListener(v -> checkGuess());
         btnGiveUp.setOnClickListener(v -> giveUp());
-        btnHint.setOnClickListener(v -> useHint());
-    }
 
-    private void startNewGame() {
-        targetNumber = random.nextInt(difficultyMax) + 1;
-        score = 0;
-        hearts = 3;
-        hints = 3; // Set default hints to 3
-        updateHearts();
-        tvHint.setText("HINTS: " + hints);
-        etGuess.setText("");
-        gamesPlayed++;
+        btnHint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MediaPlayer mediaPlayer = MediaPlayer.create(PlayActivity.this, R.raw.hint_st);
+                mediaPlayer.start();
+                mediaPlayer.setOnCompletionListener(mp -> mp.release());
+
+                useHint(); // call separated method
+            }
+        });
     }
 
     private void useHint() {
@@ -100,40 +98,35 @@ public class PlayActivity extends AppCompatActivity {
             prefs.edit().putInt("hints_used_" + difficulty, hintsUsed).apply();
             tvHint.setText("HINTS: " + hints);
 
-            // Get a random hint message
             String hintMessage;
             if (random.nextBoolean()) {
-                // Give a range hint
                 int range = difficultyMax / 4;
                 int lowerBound = (targetNumber / range) * range + 1;
                 int upperBound = lowerBound + range - 1;
                 hintMessage = "The number is between " + lowerBound + " and " + upperBound;
             } else {
-                // Give a divisibility hint
-                if (targetNumber % 2 == 0) {
-                    hintMessage = "The number is even";
-                } else {
-                    hintMessage = "The number is odd";
-                }
+                hintMessage = (targetNumber % 2 == 0) ? "The number is even" : "The number is odd";
             }
-            
-            // Show hint message in custom TextView
+
             tvHintMessage.setText(hintMessage);
             tvHintMessage.setVisibility(View.VISIBLE);
-            
-            // Hide the message after 3 seconds
-            handler.postDelayed(() -> {
-                tvHintMessage.setVisibility(View.GONE);
-            }, 3000);
+            handler.postDelayed(() -> tvHintMessage.setVisibility(View.GONE), 3000);
         } else {
             tvHintMessage.setText("No hints remaining!");
             tvHintMessage.setVisibility(View.VISIBLE);
-            
-            // Hide the message after 2 seconds
-            handler.postDelayed(() -> {
-                tvHintMessage.setVisibility(View.GONE);
-            }, 2000);
+            handler.postDelayed(() -> tvHintMessage.setVisibility(View.GONE), 2000);
         }
+    }
+
+    private void startNewGame() {
+        targetNumber = random.nextInt(difficultyMax) + 1;
+        score = 0;
+        hearts = 3;
+        hints = 3;
+        updateHearts();
+        tvHint.setText("HINTS: " + hints);
+        etGuess.setText("");
+        gamesPlayed++;
     }
 
     private String getMockingMessage(int guess) {
@@ -158,14 +151,11 @@ public class PlayActivity extends AppCompatActivity {
                 Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
             }
             tvHint.setText("HINTS: " + hints);
-            // Save highscore if needed
             int highscore = prefs.getInt("highscore_" + difficulty, 0);
             if (score > highscore) {
                 prefs.edit().putInt("highscore_" + difficulty, score).apply();
             }
-            // Restore original range message
             tvRange.setText(originalRangeMessage);
-            // Animation or toast
             Toast.makeText(this, "Correct! New number.", Toast.LENGTH_SHORT).show();
             targetNumber = random.nextInt(difficultyMax) + 1;
             etGuess.setText("");
@@ -181,7 +171,6 @@ public class PlayActivity extends AppCompatActivity {
                         .setPositiveButton("OK", (d, w) -> finish())
                         .show();
             } else {
-                // Show mocking message in tvRange
                 tvRange.setText(getMockingMessage(guess));
             }
         }
@@ -202,4 +191,20 @@ public class PlayActivity extends AppCompatActivity {
         heart2.setImageResource(hearts >= 2 ? R.drawable.heart : R.drawable.empty_heart);
         heart3.setImageResource(hearts >= 3 ? R.drawable.heart : R.drawable.empty_heart);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Don't start music here if same as SelectDifficultyActivity
+        // Just let the music continue
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Also, do NOT stop/pause here if returning to SelectDifficulty
+    }
+
+
+
 }
