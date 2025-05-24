@@ -2,23 +2,17 @@ package com.example.guessingnumber_fp.activities;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
-import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
 
-public class MainActivity extends AppCompatActivity {
-    MediaPlayer bgMusic;
+public class MainActivity extends BaseActivity {
+    private boolean isQuitting = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-        getWindow().setStatusBarColor(0xFF000000);
 
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         String currentUser = prefs.getString("current_user", null);
@@ -30,15 +24,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-        bgMusic = MediaPlayer.create(this, R.raw.bg_music);
-        bgMusic.setLooping(true);
-        if (musicOn) {
-            bgMusic.start();
-        }
+        
+        // Ensure we're in menu flow
+        isInGameFlow = false;
+        startMenuMusic();
 
         findViewById(R.id.btnPlay).setOnClickListener(v -> {
             isNavigatingWithinApp = true;
+            isInGameFlow = true; // Set game flow before starting SelectDifficultyActivity
             startActivity(new Intent(this, SelectDifficultyActivity.class));
         });
         findViewById(R.id.btnHighscores).setOnClickListener(v -> {
@@ -58,15 +51,48 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNavigatingWithinApp = false;
+        
+        // If not quitting, ensure proper music is playing
+        if (!isQuitting) {
+            SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+            boolean musicOn = prefs.getBoolean("music_on", true);
+            if (musicOn) {
+                // Always reset to menu flow when returning to main menu
+                isInGameFlow = false;
+                startMenuMusic();
+            }
+        }
+    }
+
     private void showQuitDialog() {
+        // Play quit sound if sound is enabled
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        boolean soundOn = prefs.getBoolean("sound_on", true);
+        if (soundOn) {
+            isQuitting = true;
+            MusicManager.setLooping(false);
+            MusicManager.start(this, R.raw.quit_st);
+        }
+
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Quit Game?")
                 .setMessage("Are you sure you want to quit?")
                 .setIcon(R.drawable.play)
                 .setPositiveButton("Yes", (dialogInterface, which) -> {
+                    MusicManager.release();
                     finishAffinity(); // Closes all activities and exits the app
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton("No", (dialogInterface, which) -> {
+                    if (soundOn && isQuitting) {
+                        // Restore background music if not quitting
+                        isQuitting = false;
+                        startMenuMusic();
+                    }
+                })
                 .create();
         
         dialog.setOnShowListener(dialogInterface -> {
@@ -77,32 +103,11 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private boolean isNavigatingWithinApp = false;
-
     @Override
     protected void onPause() {
         super.onPause();
-        if (!isNavigatingWithinApp && bgMusic != null && bgMusic.isPlaying()) {
-            bgMusic.pause();
+        if (!isNavigatingWithinApp && !isQuitting) {
+            MusicManager.pause();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isNavigatingWithinApp = false;
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-        if (bgMusic != null && musicOn) {
-            bgMusic.start();
-        } else if (bgMusic != null && !musicOn) {
-            bgMusic.pause();
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (bgMusic != null) bgMusic.release();
     }
 }
