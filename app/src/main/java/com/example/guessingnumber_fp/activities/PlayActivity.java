@@ -20,6 +20,7 @@ public class PlayActivity extends BaseActivity {
     String difficulty = "easy";
     Random random = new Random();
     private boolean isNavigatingWithinApp = false;
+    private boolean isInGameFlow = false;
 
     // Mocking messages arrays
     private final String[] tooLowMessages = {
@@ -87,7 +88,7 @@ public class PlayActivity extends BaseActivity {
             originalRangeMessage = "We are thinking of a number between 1 and " + difficultyMax;
             if (tvRange != null) tvRange.setText(originalRangeMessage);
 
-            startGameMusic();
+            startLevelMusic();
             startNewGame();
 
             setupClickListeners();
@@ -129,9 +130,41 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void setupClickListeners() {
-        btnGuess.setOnClickListener(v -> checkGuess());
-        btnGiveUp.setOnClickListener(v -> giveUp());
-        btnHint.setOnClickListener(v -> useHint());
+        btnGuess.setOnClickListener(v -> {
+            if (isSoundOn()) {
+                MediaPlayer guessPlayer = MediaPlayer.create(this, R.raw.guess_st);
+                if (guessPlayer != null) {
+                    guessPlayer.setLooping(false);
+                    guessPlayer.setOnCompletionListener(mp -> mp.release());
+                    guessPlayer.start();
+                }
+            }
+            checkGuess();
+        });
+        btnGiveUp.setOnClickListener(v -> {
+            if ("Back to Menu".equals(btnGiveUp.getText().toString())) {
+                isNavigatingWithinApp = true;
+                isInGameFlow = true; // Stay in game flow for SelectDifficultyActivity
+                finish();
+            } else {
+                giveUp();
+            }
+        });
+
+        btnHint.setOnClickListener(v -> {
+            // Play hint_st sound once
+            if (isSoundOn()) {
+                MediaPlayer hintPlayer = MediaPlayer.create(this, R.raw.hint_st);
+                if (hintPlayer != null) {
+                    hintPlayer.setLooping(false);
+                    hintPlayer.setOnCompletionListener(mp -> {
+                        mp.release();
+                    });
+                    hintPlayer.start();
+                }
+            }
+            useHint();
+        });
         btnTryAgain.setOnClickListener(v -> {
             // Re-enable all game components
             if (btnGuess != null) {
@@ -149,10 +182,11 @@ public class PlayActivity extends BaseActivity {
             if (btnGiveUp != null) {
                 btnGiveUp.setText("Give Up");
             }
-            
             // Start a new game
             startNewGame();
         });
+
+
     }
 
     @Override
@@ -170,7 +204,7 @@ public class PlayActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         boolean musicOn = prefs.getBoolean("music_on", true);
         if (musicOn) {
-            MusicManager.resume();
+            startLevelMusic();
         }
     }
 
@@ -392,6 +426,9 @@ public class PlayActivity extends BaseActivity {
                 btnGuess.setEnabled(false);
                 btnGuess.setClickable(false);
             }
+            if (etGuess != null) etGuess.setAlpha(0.5f);
+            if (tvRange != null) tvRange.setAlpha(0.5f);
+
             if (btnHint != null) {
                 btnHint.setEnabled(false);
                 btnHint.setClickable(false);
@@ -399,15 +436,119 @@ public class PlayActivity extends BaseActivity {
             if (etGuess != null) {
                 etGuess.setEnabled(false);
             }
-            
-            // Show both Try Again and Give Up buttons
+            // Hide the retry button in the main layout
             if (btnTryAgain != null) {
-                btnTryAgain.setVisibility(View.VISIBLE);
+                btnTryAgain.setVisibility(View.GONE);
             }
             if (btnGiveUp != null) {
                 btnGiveUp.setText("Back to Menu");
             }
-            
+
+            // Show no lives left dialog with image and sound
+            if (isSoundOn()) {
+                MediaPlayer noLivesPlayer = MediaPlayer.create(this, R.raw.no_lives_st);
+                if (noLivesPlayer != null) {
+                    noLivesPlayer.setLooping(false);
+                    noLivesPlayer.setOnCompletionListener(mp -> mp.release());
+                    noLivesPlayer.start();
+                }
+            }
+            // Custom dialog view
+            LinearLayout dialogLayout = new LinearLayout(this);
+            dialogLayout.setOrientation(LinearLayout.VERTICAL);
+            dialogLayout.setPadding(48, 35, 48, 48);
+            dialogLayout.setGravity(Gravity.CENTER);
+
+            ImageView image = new ImageView(this);
+            image.setImageResource(R.drawable.no_lives_img);
+            LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(800, 800);
+            imgParams.gravity = Gravity.CENTER;
+            image.setLayoutParams(imgParams);
+            dialogLayout.addView(image);
+
+            TextView text = new TextView(this);
+            text.setText("No lives left!");
+            text.setTextSize(20);
+            text.setGravity(Gravity.CENTER);
+            text.setPadding(0, 24, 0, 24);
+            // Match font and color to tvRange or fallback
+            if (tvRange != null) {
+                text.setTypeface(tvRange.getTypeface());
+                text.setTextColor(tvRange.getCurrentTextColor());
+            } else {
+                text.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
+                text.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
+            }
+            dialogLayout.addView(text);
+
+            // Custom button container
+            LinearLayout buttonLayout = new LinearLayout(this);
+            buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+            buttonLayout.setGravity(Gravity.CENTER);
+            buttonLayout.setPadding(0, 24, 0, 0);
+
+            // Retry button
+            Button retryBtn = new Button(this);
+            retryBtn.setText("Retry");
+            retryBtn.setTextColor(android.graphics.Color.WHITE);
+            retryBtn.setTextSize(18);
+            retryBtn.setBackgroundResource(R.drawable.rounded_red_button);
+            LinearLayout.LayoutParams retryParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            retryParams.setMargins(16, 0, 16, 0);
+            retryBtn.setLayoutParams(retryParams);
+            buttonLayout.addView(retryBtn);
+
+            // Back to Menu button
+            Button backBtn = new Button(this);
+            backBtn.setText("Back to Menu");
+            backBtn.setTextColor(android.graphics.Color.WHITE);
+            backBtn.setTextSize(18);
+            backBtn.setBackgroundResource(R.drawable.rounded_red_button);
+            LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+            backParams.setMargins(16, 0, 16, 0);
+            backBtn.setLayoutParams(backParams);
+            buttonLayout.addView(backBtn);
+
+            dialogLayout.addView(buttonLayout);
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setView(dialogLayout);
+            builder.setCancelable(false);
+            AlertDialog dialog = builder.create();
+
+            retryBtn.setOnClickListener(v -> {
+                dialog.dismiss();
+                // Re-enable all game components and start a new game
+                if (btnGuess != null) {
+                    btnGuess.setEnabled(true);
+                    btnGuess.setClickable(true);
+                }
+                if (btnHint != null) {
+                    btnHint.setEnabled(true);
+                    btnHint.setClickable(true);
+                }
+                if (etGuess != null) {
+                    etGuess.setEnabled(true);
+                    etGuess.setAlpha(1f);
+                }
+                if (tvRange != null) tvRange.setAlpha(1f);
+                if (btnGiveUp != null) {
+                    btnGiveUp.setText("Give Up");
+                }
+                startNewGame();
+            });
+            backBtn.setOnClickListener(v -> {
+                dialog.dismiss();
+                isNavigatingWithinApp = true;
+                isInGameFlow = true;
+                finish();
+            });
+            dialog.show();
+            // Ensure rounded corners are visible
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            }
+
             // Show game over message with the target number
             Toast.makeText(this, "Game Over! The number was " + targetNumber, Toast.LENGTH_LONG).show();
         } else {
@@ -421,9 +562,10 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void giveUp() {
-        // If game is over (no hearts left), just return to main menu
+        // If game is over (no hearts left), just return to select difficulty
         if (hearts <= 0) {
             isNavigatingWithinApp = true;
+            isInGameFlow = true; // Stay in game flow when returning to SelectDifficultyActivity
             finish();
             return;
         }
@@ -444,6 +586,7 @@ public class PlayActivity extends BaseActivity {
                             .setMessage("The number was: " + targetNumber)
                             .setPositiveButton("OK", (d, w) -> {
                                 isNavigatingWithinApp = true;
+                                isInGameFlow = true;
                                 finish();
                             })
                             .create();
@@ -453,6 +596,7 @@ public class PlayActivity extends BaseActivity {
                         resultDialog.show();
                     } else {
                         isNavigatingWithinApp = true;
+                        isInGameFlow = true;
                         finish();
                     }
                 })
@@ -472,4 +616,55 @@ public class PlayActivity extends BaseActivity {
         heart2.setImageResource(hearts >= 2 ? R.drawable.heart : R.drawable.empty_heart);
         heart3.setImageResource(hearts >= 3 ? R.drawable.heart : R.drawable.empty_heart);
     }
+    @Override
+    public void finish() {
+        isNavigatingWithinApp = true;
+        // Do not stop music, let SelectDifficultyActivity resume its music
+        super.finish();
+    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("targetNumber", targetNumber);
+        outState.putInt("score", score);
+        outState.putInt("hearts", hearts);
+        outState.putInt("hints", hints);
+        outState.putBoolean("hasGuessedThisRound", hasGuessedThisRound);
+    }
+
+    private int getMusicResForDifficulty() {
+        switch (difficulty) {
+            case "easy":
+                return R.raw.ez_bg_music;
+            case "medium":
+                return R.raw.medium_bg_music;
+            case "hard":
+                return R.raw.hard_bg_music;
+            default:
+                return R.raw.ez_bg_music;
+        }
+    }
+
+    private void startLevelMusic() {
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        boolean musicOn = prefs.getBoolean("music_on", true);
+        if (!musicOn) {
+            MusicManager.stop();
+            return;
+        }
+        int musicRes = getMusicResForDifficulty();
+        MusicManager.setLooping(true);
+        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != musicRes) {
+            MusicManager.start(this, musicRes);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = true;
+        super.onBackPressed();
+    }
 }
+
+

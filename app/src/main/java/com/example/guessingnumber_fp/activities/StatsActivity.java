@@ -87,4 +87,11 @@ public class StatsActivity extends BaseActivity {
         // Display best score
         ((TextView)findViewById(R.id.tvBestScore)).setText(String.valueOf(bestScore));
     }
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = false;
+        super.onBackPressed();
+    }
+
 }

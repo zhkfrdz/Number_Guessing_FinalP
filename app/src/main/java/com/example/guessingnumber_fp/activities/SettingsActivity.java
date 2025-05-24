@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.Button;
+import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
 
 public class SettingsActivity extends BaseActivity {
@@ -17,6 +18,8 @@ public class SettingsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        if (getSupportActionBar() != null) getSupportActionBar().hide();
+        getWindow().setStatusBarColor(0xFF000000);
 
         switchMusic = findViewById(R.id.switchMusic);
         switchSound = findViewById(R.id.switchSound);
@@ -29,20 +32,14 @@ public class SettingsActivity extends BaseActivity {
         switchMusic.setChecked(musicOn);
         switchSound.setChecked(soundOn);
 
-        startMenuMusic();
-
         switchMusic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 prefs.edit().putBoolean("music_on", isChecked).apply();
                 if (isChecked) {
-                    if (isInGameFlow) {
-                        startGameMusic();
-                    } else {
-                        startMenuMusic();
-                    }
+                    startMenuMusic();
                 } else {
-                    MusicManager.pause();
+                    MusicManager.stop();
                 }
             }
         });
@@ -53,10 +50,47 @@ public class SettingsActivity extends BaseActivity {
             }
         });
         btnLogout.setOnClickListener(v -> {
-            isNavigatingWithinApp = true;
             prefs.edit().remove("current_user").apply();
             startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
             finishAffinity();
         });
+
+        // Add this for the back button
+        android.widget.ImageButton btnBackSettings = findViewById(R.id.btnBackSettings);
+        if (btnBackSettings != null) {
+            btnBackSettings.setOnClickListener(v -> {
+                isNavigatingWithinApp = true;
+                isInGameFlow = false;
+                onBackPressed();
+            });
+        }
+    }
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = false;
+        super.onBackPressed();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNavigatingWithinApp = false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private boolean isSoundOn() {
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        return prefs.getBoolean("sound_on", true);
     }
 }

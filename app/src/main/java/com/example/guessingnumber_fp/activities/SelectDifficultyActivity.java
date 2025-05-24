@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.activities.MusicManager;
 
 public class SelectDifficultyActivity extends BaseActivity {
 
@@ -21,7 +22,7 @@ public class SelectDifficultyActivity extends BaseActivity {
 
         // This is part of the game flow
         isInGameFlow = true;
-        startGameMusic();
+        startSelectDifficultyMusic();
 
         cardEasy.setOnClickListener(v -> startGame("easy", 10));
         cardMedium.setOnClickListener(v -> startGame("medium", 50));
@@ -36,9 +37,15 @@ public class SelectDifficultyActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Ensure we're in game flow and playing game music
         isInGameFlow = true;
-        startGameMusic();
+        startSelectDifficultyMusic();
+    }
+
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = false; // Set to menu flow when going back to MainActivity
+        super.onBackPressed();
     }
 
     private void startGame(String difficulty, int max) {
@@ -47,5 +54,19 @@ public class SelectDifficultyActivity extends BaseActivity {
         intent.putExtra("difficulty", difficulty);
         intent.putExtra("max", max);
         startActivity(intent);
+    }
+
+    private void startSelectDifficultyMusic() {
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        boolean musicOn = prefs.getBoolean("music_on", true);
+        if (!musicOn) {
+            MusicManager.stop();
+            return;
+        }
+        int musicRes = R.raw.bg_music_2;
+        MusicManager.setLooping(true);
+        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != musicRes) {
+            MusicManager.start(this, musicRes);
+        }
     }
 } 
