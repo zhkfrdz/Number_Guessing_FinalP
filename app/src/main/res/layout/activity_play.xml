@@ -6,205 +6,200 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <ScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:padding="32dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvLevel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="32dp">
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/audiowide"
+            android:text="EASY LEVEL"
+            android:textColor="#fff"
+            android:textSize="28sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/tvLevel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/audiowide"
-                android:text="EASY LEVEL"
-                android:textColor="#fff"
-                android:textSize="28sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <LinearLayout
-                android:id="@+id/heartsContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvLevel">
-
-                <ImageView
-                    android:id="@+id/heart1"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/heart" />
-
-                <ImageView
-                    android:id="@+id/heart2"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginLeft="12dp"
-                    android:src="@drawable/heart" />
-
-                <ImageView
-                    android:id="@+id/heart3"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginLeft="12dp"
-                    android:src="@drawable/heart" />
-            </LinearLayout>
+        <LinearLayout
+            android:id="@+id/heartsContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvLevel">
 
             <ImageView
-                android:id="@+id/imgCats"
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                android:layout_marginTop="32dp"
-                android:src="@drawable/play"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/heartsContainer" />
+                android:id="@+id/heart1"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:src="@drawable/heart" />
 
-            <TextView
-                android:id="@+id/tvRange"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:layout_marginTop="32dp"
-                android:ellipsize="end"
-                android:fontFamily="@font/poppins_medium"
-                android:gravity="center"
-                android:maxLines="2"
-                android:paddingHorizontal="16dp"
-                android:text="We are thinking of a number between 1 and 50"
-                android:textColor="#FF6B4A"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/imgCats" />
+            <ImageView
+                android:id="@+id/heart2"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/heart" />
 
-            <TextView
-                android:id="@+id/tvHint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:fontFamily="@font/poppins_medium"
-                android:text="HINTS: 0"
-                android:textColor="#fff"
-                android:textSize="18sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvRange" />
+            <ImageView
+                android:id="@+id/heart3"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="12dp"
+                android:src="@drawable/heart" />
+        </LinearLayout>
 
-            <EditText
-                android:id="@+id/etGuess"
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_marginTop="32dp"
-                android:background="@drawable/edittext_white_rounded"
-                android:fontFamily="@font/poppins_medium"
-                android:gravity="center"
-                android:hint="Enter your guess"
-                android:inputType="number"
-                android:padding="0dp"
-                android:textColor="#fff"
-                android:textColorHint="#888"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvHint" />
+        <ImageView
+            android:id="@+id/imgCats"
+            android:layout_width="180dp"
+            android:layout_height="180dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/play"
+            app:layout_constraintTop_toBottomOf="@id/heartsContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-            <LinearLayout
-                android:id="@+id/buttonsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:orientation="horizontal"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/etGuess">
+        <TextView
+            android:id="@+id/tvRange"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center"
+            android:maxLines="2"
+            android:paddingHorizontal="16dp"
+            android:text="We are thinking of a number between 1 and 50"
+            android:textColor="#FF6B4A"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/imgCats"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-                <Button
-                    android:id="@+id/btnGuess"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#FF6B4A"
-                    android:fontFamily="@font/poppins_medium"
-                    android:text="Guess"
-                    android:textColor="#fff"
-                    android:textSize="20sp"
-                    app:cornerRadius="30dp" />
+        <TextView
+            android:id="@+id/tvHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/poppins_medium"
+            android:text="HINTS: 0"
+            android:textColor="#fff"
+            android:textSize="18sp"
+            app:layout_constraintTop_toBottomOf="@id/tvRange"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-                <Button
-                    android:id="@+id/btnHintButton"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1"
-                    android:backgroundTint="#FF6B4A"
-                    android:fontFamily="@font/poppins_medium"
-                    android:text="Hint"
-                    android:textColor="#fff"
-                    android:textSize="20sp"
-                    app:cornerRadius="30dp" />
-            </LinearLayout>
+        <EditText
+            android:id="@+id/etGuess"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/edittext_white_rounded"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center"
+            android:hint="Enter your guess"
+            android:inputType="number"
+            android:padding="0dp"
+            android:textColor="#fff"
+            android:textColorHint="#888"
+            android:textSize="20sp"
+            app:layout_constraintTop_toBottomOf="@id/tvHint"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/buttonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/etGuess"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <Button
-                android:id="@+id/btnGiveUp"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                android:layout_width="match_parent"
+                android:id="@+id/btnGuess"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
                 android:layout_height="60dp"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="#FFFFFF"
+                android:layout_weight="1"
+                android:backgroundTint="#FF6B4A"
                 android:fontFamily="@font/poppins_medium"
-                android:text="Give Up"
-                android:textColor="#FF6B4A"
+                android:text="Guess"
+                android:textColor="#fff"
                 android:textSize="20sp"
-                app:cornerRadius="30dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/buttonsContainer" />
+                app:cornerRadius="30dp" />
 
-            <ImageButton
-                android:id="@+id/btnTryAgain"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_marginTop="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_retry"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/btnGiveUp" />
-
-            <TextView
-                android:id="@+id/tvHintMessage"
-                android:layout_width="165dp"
-                android:layout_height="139dp"
-                android:layout_marginEnd="4dp"
-                android:layout_marginBottom="6dp"
-                android:background="@drawable/bubble"
+            <Button
+                android:id="@+id/btnHintButton"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"
+                android:backgroundTint="#FF6B4A"
                 android:fontFamily="@font/poppins_medium"
-                android:gravity="center"
-                android:lineSpacingExtra="4dp"
-                android:maxWidth="160dp"
-                android:padding="20dp"
-                android:textAlignment="center"
-                android:textColor="#000000"
-                android:textSize="15sp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@id/imgCats"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/heartsContainer"
-                app:layout_constraintVertical_bias="0.349" />
+                android:text="Hint"
+                android:textColor="#fff"
+                android:textSize="20sp"
+                app:cornerRadius="30dp" />
+        </LinearLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+        <Button
+            android:id="@+id/btnGiveUp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_marginTop="12dp"
+            android:backgroundTint="#FFFFFF"
+            android:fontFamily="@font/poppins_medium"
+            android:text="Give Up"
+            android:textColor="#FF6B4A"
+            android:textSize="20sp"
+            app:cornerRadius="30dp"
+            app:layout_constraintTop_toBottomOf="@id/buttonsContainer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <ImageButton
+            android:id="@+id/btnTryAgain"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_retry"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/btnGiveUp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <TextView
+            android:id="@+id/tvHintMessage"
+            android:layout_width="165dp"
+            android:layout_height="139dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/bubble"
+            android:fontFamily="@font/poppins_medium"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:maxWidth="160dp"
+            android:padding="20dp"
+            android:textAlignment="center"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:visibility="invisible"
+            app:layout_constraintTop_toTopOf="@id/heartsContainer"
+            app:layout_constraintBottom_toBottomOf="@id/imgCats"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.349" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
