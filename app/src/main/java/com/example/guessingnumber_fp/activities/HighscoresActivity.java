@@ -65,4 +65,11 @@ public class HighscoresActivity extends BaseActivity {
             this.score = score;
         }
     }
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = false;
+        super.onBackPressed();
+    }
+
 }

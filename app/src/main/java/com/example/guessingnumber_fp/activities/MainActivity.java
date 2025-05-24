@@ -55,15 +55,16 @@ public class MainActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         isNavigatingWithinApp = false;
-        
         // If not quitting, ensure proper music is playing
         if (!isQuitting) {
             SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
             boolean musicOn = prefs.getBoolean("music_on", true);
             if (musicOn) {
-                // Always reset to menu flow when returning to main menu
-                isInGameFlow = false;
-                startMenuMusic();
+                // Only start menu music if not already playing
+                if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != R.raw.bg_music) {
+                    isInGameFlow = false;
+                    startMenuMusic();
+                }
             }
         }
     }
