@@ -2,77 +2,89 @@ package com.example.guessingnumber_fp.activities;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.*;
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.Spinner;
+import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
+import android.view.View;
+import android.graphics.Color;
+import android.widget.TextView;
 import com.example.guessingnumber_fp.R;
 
-public class StatsActivity extends AppCompatActivity {
-    String[] levels = {"Easy", "Medium", "Hard"};
-    String difficulty = "easy";
-    SharedPreferences prefs;
+public class StatsActivity extends BaseActivity {
+    private String currentDifficulty = "easy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().hide();
-        }
-        getWindow().setStatusBarColor(0xFF000000);
         setContentView(R.layout.activity_stats);
 
-        prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        String currentUser = prefs.getString("current_user", "guest");
 
-        Spinner spinner = findViewById(R.id.spinnerDifficulty);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, levels);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+        startMenuMusic();
 
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
-                difficulty = levels[position].toLowerCase();
-                updateStats();
+        // Setup difficulty spinner
+        Spinner spinnerDifficulty = findViewById(R.id.spinnerDifficulty);
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<CharSequence>(this,
+                android.R.layout.simple_spinner_item,
+                getResources().getStringArray(R.array.difficulties_array)) {
+            @Override
+            public View getView(int position, View convertView, android.view.ViewGroup parent) {
+                TextView view = (TextView) super.getView(position, convertView, parent);
+                view.setTextColor(Color.WHITE);
+                return view;
             }
-            @Override public void onNothingSelected(AdapterView<?> parent) {}
+
+            @Override
+            public View getDropDownView(int position, View convertView, android.view.ViewGroup parent) {
+                TextView view = (TextView) super.getDropDownView(position, convertView, parent);
+                view.setTextColor(Color.WHITE);
+                return view;
+            }
+        };
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerDifficulty.setAdapter(adapter);
+
+        spinnerDifficulty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String[] difficulties = {"easy", "medium", "hard"};
+                currentDifficulty = difficulties[position];
+                displayStats(prefs, currentUser, currentDifficulty);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
-        ((ImageButton)findViewById(R.id.btnBackStats)).setOnClickListener(v -> finish());
-        updateStats();
+        // Initial stats display
+        displayStats(prefs, currentUser, currentDifficulty);
+
+        ((ImageButton)findViewById(R.id.btnBackStats)).setOnClickListener(v -> {
+            isNavigatingWithinApp = true;
+            finish();
+        });
     }
 
-    /**
-     * Update all stats fields for the selected difficulty.
-     * Handles empty/zero stats gracefully and updates all UI fields.
-     */
-    private void updateStats() {
-        String currentUser = prefs.getString("current_user", "guest");
-        // Per-user stats
-        int gamesPlayed = prefs.getInt("games_played_" + difficulty + "_" + currentUser, 0);
-        int correctGuesses = prefs.getInt("games_won_" + difficulty + "_" + currentUser, 0);
-        int wrongGuesses = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0);
-        int hintsUsed = prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0);
-        // Best score for user (optional, can show global if desired)
-        int bestScore = prefs.getInt("highscore_" + difficulty + "_" + currentUser, 0);
-        // Global highscore (for display, if you want)
-        // int globalHighscore = prefs.getInt("highscore_" + difficulty, 0);
+    private void displayStats(SharedPreferences prefs, String user, String difficulty) {
+        int gamesPlayed = prefs.getInt("games_played_" + difficulty + "_" + user, 0);
+        int gamesWon = prefs.getInt("games_won_" + difficulty + "_" + user, 0);
+        int gamesLost = prefs.getInt("games_lost_" + difficulty + "_" + user, 0);
+        int hintsUsed = prefs.getInt("hints_used_" + difficulty + "_" + user, 0);
+        int bestScore = prefs.getInt("highscore_" + difficulty + "_" + user, 0);
 
-        TextView tvGamesPlayed = findViewById(R.id.tvGamesPlayed);
-        TextView tvCorrectGuesses = findViewById(R.id.tvGamesWon);
-        TextView tvWrongGuesses = findViewById(R.id.tvGamesLost);
-        TextView tvHintsUsed = findViewById(R.id.tvHintsUsed);
-        TextView tvWinRate = findViewById(R.id.tvWinRate);
-        TextView tvBestScore = findViewById(R.id.tvBestScore);
-
-        tvGamesPlayed.setText(String.valueOf(gamesPlayed));
-        tvCorrectGuesses.setText(String.valueOf(correctGuesses));
-        tvWrongGuesses.setText(String.valueOf(wrongGuesses));
-        tvHintsUsed.setText(String.valueOf(hintsUsed));
-        // Calculate win rate
-        String winRateStr = "0%";
-        if (gamesPlayed > 0) {
-            double winRate = ((double) correctGuesses / (double) gamesPlayed) * 100.0;
-            winRateStr = String.format("%.1f%%", winRate);
-        }
-        tvWinRate.setText(winRateStr);
-        tvBestScore.setText(String.valueOf(bestScore));
+        ((TextView)findViewById(R.id.tvGamesPlayed)).setText(String.valueOf(gamesPlayed));
+        ((TextView)findViewById(R.id.tvGamesWon)).setText(String.valueOf(gamesWon));
+        ((TextView)findViewById(R.id.tvGamesLost)).setText(String.valueOf(gamesLost));
+        ((TextView)findViewById(R.id.tvHintsUsed)).setText(String.valueOf(hintsUsed));
+        
+        // Calculate and display win rate
+        float winRate = gamesPlayed > 0 ? (float)gamesWon / gamesPlayed * 100 : 0;
+        ((TextView)findViewById(R.id.tvWinRate)).setText(String.format("%.1f%%", winRate));
+        
+        // Display best score
+        ((TextView)findViewById(R.id.tvBestScore)).setText(String.valueOf(bestScore));
     }
 }

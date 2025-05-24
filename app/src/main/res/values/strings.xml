@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">GuessingNumber_FP</string>
+    
+    <string-array name="difficulties_array">
+        <item>Easy</item>
+        <item>Medium</item>
+        <item>Hard</item>
+    </string-array>
 </resources>

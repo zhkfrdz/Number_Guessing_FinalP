@@ -8,13 +8,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends BaseActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private SharedPreferences prefs;
+    private boolean isNavigatingWithinApp = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +27,8 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+
+        startMenuMusic();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,10 +44,38 @@ public class LoginActivity extends AppCompatActivity {
                 // Optionally: Save password for demo (not secure for real apps)
                 prefs.edit().putString("password_" + username, password).apply();
                 // Go to MainActivity
+                isNavigatingWithinApp = true;
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!isNavigatingWithinApp) {
+            MusicManager.pause();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNavigatingWithinApp = false;
+        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        boolean musicOn = prefs.getBoolean("music_on", true);
+        if (musicOn) {
+            MusicManager.resume();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (!isNavigatingWithinApp) {
+            MusicManager.release();
+        }
     }
 }
