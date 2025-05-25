@@ -13,20 +13,36 @@ public class MusicManager {
 
     public static void start(Context context, int resId) {
         try {
-            if (mediaPlayer != null) {
-                if (currentResId == resId && mediaPlayer.isPlaying()) {
-                    return;
-                }
-                stop();
+            appContext = context.getApplicationContext();
+
+            // If the same music is already playing, don't restart it
+            if (mediaPlayer != null && currentResId == resId && mediaPlayer.isPlaying()) {
+                return;
             }
-            mediaPlayer = MediaPlayer.create(context.getApplicationContext(), resId);
+
+            // If we have a previous player, clean it up properly
+            if (mediaPlayer != null) {
+                try {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                    }
+                    mediaPlayer.release();
+                } catch (Exception e) {
+                    Log.e("Music", "Error cleaning up previous player: " + e.getMessage());
+                }
+            }
+
+            // Create and start new player
+            mediaPlayer = MediaPlayer.create(appContext, resId);
             if (mediaPlayer != null) {
                 currentResId = resId;
                 mediaPlayer.setLooping(shouldLoop);
                 mediaPlayer.start();
                 isPaused = false;
+                Log.d("Music", "Started playing music: " + resId);
             }
         } catch (Exception e) {
+            Log.e("Music", "Error in start(): " + e.getMessage());
             release();
         }
     }
@@ -112,5 +128,11 @@ public class MusicManager {
 
     public static boolean isPaused() {
         return isPaused;
+    }
+
+    public static void switchMusic(Context context, int newResId) {
+        Log.d("Music", "Switching music from " + currentResId + " to " + newResId);
+        stop();
+        start(context, newResId);
     }
 }
