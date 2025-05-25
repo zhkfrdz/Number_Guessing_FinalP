@@ -6,9 +6,9 @@ import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.example.guessingnumber_fp.R;
-import com.example.guessingnumber_fp.activities.MusicManager;
 
 public class SelectDifficultyActivity extends BaseActivity {
+    private static final int DIFFICULTY_MUSIC = R.raw.bg_music_2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,17 +35,30 @@ public class SelectDifficultyActivity extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        isInGameFlow = true;
+    protected void onStart() {
+        super.onStart();
         startSelectDifficultyMusic();
     }
 
     @Override
-    public void onBackPressed() {
-        isNavigatingWithinApp = true;
-        isInGameFlow = false; // Set to menu flow when going back to MainActivity
-        super.onBackPressed();
+    protected void onResume() {
+        super.onResume();
+        isNavigatingWithinApp = false;
+        isInGameFlow = true;
+
+        // If music isn't playing or it's the wrong track, start it
+        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != DIFFICULTY_MUSIC) {
+            startSelectDifficultyMusic();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Only pause if we're not navigating within the app
+        if (!isNavigatingWithinApp) {
+            MusicManager.pause();
+        }
     }
 
     private void startGame(String difficulty, int max) {
@@ -63,10 +76,21 @@ public class SelectDifficultyActivity extends BaseActivity {
             MusicManager.stop();
             return;
         }
-        int musicRes = R.raw.bg_music_2;
-        MusicManager.setLooping(true);
-        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != musicRes) {
-            MusicManager.start(this, musicRes);
+
+        // Only start if not already playing the correct music
+        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != DIFFICULTY_MUSIC) {
+            MusicManager.setLooping(true);
+            MusicManager.start(this, DIFFICULTY_MUSIC);
         }
     }
-} 
+
+    @Override
+    public void onBackPressed() {
+        isNavigatingWithinApp = true;
+        isInGameFlow = false;
+        super.onBackPressed();
+    }
+}
+
+
+
