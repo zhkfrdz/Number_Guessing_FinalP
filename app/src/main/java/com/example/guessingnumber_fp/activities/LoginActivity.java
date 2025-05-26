@@ -14,7 +14,6 @@ public class LoginActivity extends BaseActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private SharedPreferences prefs;
-    private boolean isNavigatingWithinApp = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

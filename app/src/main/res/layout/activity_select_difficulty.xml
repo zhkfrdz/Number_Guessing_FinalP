@@ -1,61 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#000000"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_arrow_back"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Back"
+        android:tint="#FFFFFF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <TextView
+        android:id="@+id/tvChooseLevel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="32dp">
+        android:fontFamily="@font/audiowide"
+        android:text="CHOOSE LEVEL"
+        android:textColor="#fff"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="16sp"
+        android:autoSizeMaxTextSize="32sp"
+        app:layout_constraintTop_toBottomOf="@id/btnBack"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@drawable/ic_arrow_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
-            android:layout_gravity="start"
-            android:tint="#FFFFFF"
-            android:layout_marginTop="8dp"/>
+    <TextView
+        android:id="@+id/tvSelectChallenge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Select your challenge"
+        android:textColor="#888"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="18sp"
+        app:layout_constraintTop_toBottomOf="@id/tvChooseLevel"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="4dp"/>
 
-        <TextView
-            android:id="@+id/tvChooseLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="32dp"
-            android:fontFamily="@font/audiowide"
-            android:text="CHOOSE LEVEL"
-            android:textColor="#fff"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+    <!-- Easy Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardEasy"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="#1A1A1A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/tvSelectChallenge"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Select your challenge"
-            android:textColor="#888"
-            android:textSize="16sp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"/>
-
-        <!-- EASY -->
         <LinearLayout
-            android:id="@+id/cardEasy"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginTop="48dp"
-            android:background="@drawable/card_border_orange"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="24dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:gravity="center_vertical"
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -93,20 +108,27 @@
                 android:textSize="24sp"
                 android:fontFamily="@font/audiowide" />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <!-- MEDIUM -->
+    <!-- Medium Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardMedium"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="#1A1A1A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/cardEasy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
         <LinearLayout
-            android:id="@+id/cardMedium"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginTop="24dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@drawable/card_border_orange"
             android:gravity="center_vertical"
-            android:padding="24dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -137,27 +159,34 @@
                 android:id="@+id/badgeMedium"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
+                android:background="@drawable/circle_orange"
                 android:gravity="center"
                 android:text="2"
                 android:textColor="#fff"
                 android:textSize="24sp"
-                android:fontFamily="@font/audiowide"
-                android:background="@drawable/circle_orange"/>
+                android:fontFamily="@font/audiowide" />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-        <!-- HARD -->
+    <!-- Hard Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardHard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="#1A1A1A"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toBottomOf="@id/cardMedium"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
         <LinearLayout
-            android:id="@+id/cardHard"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/card_border_orange"
-            android:gravity="center_vertical"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:padding="24dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:gravity="center_vertical"
+            android:padding="16dp">
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -195,6 +224,6 @@
                 android:textSize="24sp"
                 android:fontFamily="@font/audiowide" />
         </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
-    </LinearLayout>
-</ScrollView> 
+</androidx.constraintlayout.widget.ConstraintLayout> 

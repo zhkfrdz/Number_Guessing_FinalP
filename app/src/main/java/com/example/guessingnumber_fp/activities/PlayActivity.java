@@ -19,8 +19,6 @@ public class PlayActivity extends BaseActivity {
     int gamesPlayed = 0, gamesWon = 0, gamesLost = 0, hintsUsed = 0;
     String difficulty = "easy";
     Random random = new Random();
-    private boolean isNavigatingWithinApp = false;
-    private boolean isInGameFlow = false;
 
     // Mocking messages arrays
     private final String[] tooLowMessages = {
@@ -110,7 +108,7 @@ public class PlayActivity extends BaseActivity {
             heart3 = findViewById(R.id.heart3);
             btnGuess = findViewById(R.id.btnGuess);
             btnGiveUp = findViewById(R.id.btnGiveUp);
-            btnHint = findViewById(R.id.btnHintButton);
+            btnHint = findViewById(R.id.btnHint);
             btnTryAgain = findViewById(R.id.btnTryAgain);
 
             // Essential components that must not be null
@@ -143,8 +141,6 @@ public class PlayActivity extends BaseActivity {
         });
         btnGiveUp.setOnClickListener(v -> {
             if ("Back to Menu".equals(btnGiveUp.getText().toString())) {
-                isNavigatingWithinApp = true;
-                isInGameFlow = true; // Stay in game flow for SelectDifficultyActivity
                 finish();
             } else {
                 giveUp();
@@ -192,7 +188,6 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Only pause if we're not navigating within the app
         if (!isNavigatingWithinApp) {
             MusicManager.pause();
         }
@@ -212,10 +207,8 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        // If we're navigating within app, ensure we stop our music
-        // to let the next activity start its music
-        if (isNavigatingWithinApp) {
-            MusicManager.stop();
+        if (!isNavigatingWithinApp) {
+            MusicManager.pause();
         }
     }
 
@@ -484,6 +477,21 @@ public class PlayActivity extends BaseActivity {
             }
             dialogLayout.addView(text);
 
+            // Add the number reveal below
+            TextView numberReveal = new TextView(this);
+            numberReveal.setText("The number was " + targetNumber);
+            numberReveal.setTextSize(18);
+            numberReveal.setGravity(Gravity.CENTER);
+            numberReveal.setPadding(0, 4, 0, 24);
+            if (tvRange != null) {
+                numberReveal.setTypeface(tvRange.getTypeface());
+                numberReveal.setTextColor(tvRange.getCurrentTextColor());
+            } else {
+                numberReveal.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
+                numberReveal.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
+            }
+            dialogLayout.addView(numberReveal);
+
             // Custom button container
             LinearLayout buttonLayout = new LinearLayout(this);
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -543,7 +551,6 @@ public class PlayActivity extends BaseActivity {
             backBtn.setOnClickListener(v -> {
                 dialog.dismiss();
                 isNavigatingWithinApp = true;
-                isInGameFlow = true;
                 finish();
             });
             dialog.show();
@@ -551,15 +558,10 @@ public class PlayActivity extends BaseActivity {
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
-
-            // Show game over message with the target number
-            Toast.makeText(this, "Game Over! The number was " + targetNumber, Toast.LENGTH_LONG).show();
         } else {
             if (tvRange != null) {
                 String message = getMockingMessage(guess);
                 tvRange.setText(message);
-                // Also show whether the guess was too high or too low
-                Toast.makeText(this, guess < targetNumber ? "Too low!" : "Too high!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -568,7 +570,6 @@ public class PlayActivity extends BaseActivity {
         // If game is over (no hearts left), just return to select difficulty
         if (hearts <= 0) {
             isNavigatingWithinApp = true;
-            isInGameFlow = true;
             finish();
             return;
         }
@@ -585,11 +586,10 @@ public class PlayActivity extends BaseActivity {
                         int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
                         prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
                         AlertDialog resultDialog = new AlertDialog.Builder(this)
-                                .setTitle("Gave Up")
+                                .setTitle("Game Over!")
                                 .setMessage("The number was: " + targetNumber)
                                 .setPositiveButton("OK", (d, w) -> {
                                     isNavigatingWithinApp = true;
-                                    isInGameFlow = true;
                                     finish();
                                 })
                                 .create();
@@ -599,7 +599,6 @@ public class PlayActivity extends BaseActivity {
                         resultDialog.show();
                     } else {
                         isNavigatingWithinApp = true;
-                        isInGameFlow = true;
                         finish();
                     }
                 })
@@ -621,8 +620,6 @@ public class PlayActivity extends BaseActivity {
     }
     @Override
     public void finish() {
-        isNavigatingWithinApp = true;
-        isInGameFlow = true;
         super.finish();
     }
     @Override
@@ -667,7 +664,6 @@ public class PlayActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         isNavigatingWithinApp = true;
-        isInGameFlow = true;
         super.onBackPressed();
     }
 }
