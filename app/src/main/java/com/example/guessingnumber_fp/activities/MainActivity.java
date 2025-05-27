@@ -27,7 +27,7 @@ public class MainActivity extends BaseActivity {
         
         // Ensure we're in menu flow
         isInGameFlow = false;
-        startMenuMusic();
+        // No background music logic in MainActivity
 
         findViewById(R.id.btnPlay).setOnClickListener(v -> {
             isNavigatingWithinApp = true;
@@ -56,17 +56,7 @@ public class MainActivity extends BaseActivity {
         super.onResume();
         isNavigatingWithinApp = false;
         // If not quitting, ensure proper music is playing
-        if (!isQuitting) {
-            SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-            boolean musicOn = prefs.getBoolean("music_on", true);
-            if (musicOn) {
-                // Only start menu music if not already playing
-                if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != R.raw.bg_music) {
-                    isInGameFlow = false;
-                    startMenuMusic();
-                }
-            }
-        }
+        // No background music logic in MainActivity
     }
 
     private void showQuitDialog() {
@@ -91,7 +81,7 @@ public class MainActivity extends BaseActivity {
                     if (soundOn && isQuitting) {
                         // Restore background music if not quitting
                         isQuitting = false;
-                        startMenuMusic();
+                        // No background music logic in MainActivity
                     }
                 })
                 .create();

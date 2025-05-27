@@ -63,9 +63,6 @@ public class PlayActivity extends BaseActivity {
             prefs = getSharedPreferences("game_data", MODE_PRIVATE);
             boolean musicOn = prefs.getBoolean("music_on", true);
             MusicManager.setLooping(true);
-            if (musicOn) {
-                MusicManager.start(this, R.raw.bg_music_2);
-            }
 
             // Initialize UI components
             initializeUIComponents();
@@ -202,21 +199,19 @@ public class PlayActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         isNavigatingWithinApp = false;
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-        if (musicOn) {
-            startLevelMusic();
-        }
+        startLevelMusic();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        // If we're navigating within app, ensure we stop our music
-        // to let the next activity start its music
-        if (isNavigatingWithinApp) {
-            MusicManager.stop();
-        }
+        // Do NOT stop or release music here
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Do NOT stop or release music here
     }
 
     private boolean isSoundOn() {
@@ -473,7 +468,7 @@ public class PlayActivity extends BaseActivity {
             text.setText("No lives left!");
             text.setTextSize(20);
             text.setGravity(Gravity.CENTER);
-            text.setPadding(0, 24, 0, 24);
+            text.setPadding(0, 24, 0, 8);
             // Match font and color to tvRange or fallback
             if (tvRange != null) {
                 text.setTypeface(tvRange.getTypeface());
@@ -483,6 +478,21 @@ public class PlayActivity extends BaseActivity {
                 text.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
             }
             dialogLayout.addView(text);
+
+            // Add the number reveal below
+            TextView numberReveal = new TextView(this);
+            numberReveal.setText("The number was: " + targetNumber);
+            numberReveal.setTextSize(18);
+            numberReveal.setGravity(Gravity.CENTER);
+            numberReveal.setPadding(0, 0, 0, 24);
+            if (tvRange != null) {
+                numberReveal.setTypeface(tvRange.getTypeface());
+                numberReveal.setTextColor(tvRange.getCurrentTextColor());
+            } else {
+                numberReveal.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
+                numberReveal.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
+            }
+            dialogLayout.addView(numberReveal);
 
             // Custom button container
             LinearLayout buttonLayout = new LinearLayout(this);
@@ -553,13 +563,13 @@ public class PlayActivity extends BaseActivity {
             }
 
             // Show game over message with the target number
-            Toast.makeText(this, "Game Over! The number was " + targetNumber, Toast.LENGTH_LONG).show();
+            // Toast.makeText(this, "Game Over! The number was " + targetNumber, Toast.LENGTH_LONG).show();
         } else {
             if (tvRange != null) {
                 String message = getMockingMessage(guess);
                 tvRange.setText(message);
                 // Also show whether the guess was too high or too low
-                Toast.makeText(this, guess < targetNumber ? "Too low!" : "Too high!", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(this, guess < targetNumber ? "Too low!" : "Too high!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -584,15 +594,34 @@ public class PlayActivity extends BaseActivity {
                         String currentUser = prefs.getString("current_user", "guest");
                         int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
                         prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
-                        AlertDialog resultDialog = new AlertDialog.Builder(this)
-                                .setTitle("Gave Up")
-                                .setMessage("The number was: " + targetNumber)
-                                .setPositiveButton("OK", (d, w) -> {
-                                    isNavigatingWithinApp = true;
-                                    isInGameFlow = true;
-                                    finish();
-                                })
-                                .create();
+                        // Show a custom dialog with the number revealed below the title
+                        AlertDialog.Builder resultBuilder = new AlertDialog.Builder(this);
+                        LinearLayout layout = new LinearLayout(this);
+                        layout.setOrientation(LinearLayout.VERTICAL);
+                        layout.setPadding(48, 48, 48, 48);
+                        layout.setGravity(Gravity.CENTER);
+                        TextView title = new TextView(this);
+                        title.setText("Gave Up");
+                        title.setTextSize(22);
+                        title.setGravity(Gravity.CENTER);
+                        title.setTypeface(tvRange != null ? tvRange.getTypeface() : null);
+                        title.setTextColor(tvRange != null ? tvRange.getCurrentTextColor() : android.graphics.Color.parseColor("#FF6B4A"));
+                        layout.addView(title);
+                        TextView numberReveal = new TextView(this);
+                        numberReveal.setText("The number was: " + targetNumber);
+                        numberReveal.setTextSize(18);
+                        numberReveal.setGravity(Gravity.CENTER);
+                        numberReveal.setPadding(0, 16, 0, 0);
+                        numberReveal.setTypeface(tvRange != null ? tvRange.getTypeface() : null);
+                        numberReveal.setTextColor(tvRange != null ? tvRange.getCurrentTextColor() : android.graphics.Color.parseColor("#FF6B4A"));
+                        layout.addView(numberReveal);
+                        resultBuilder.setView(layout);
+                        resultBuilder.setPositiveButton("OK", (d, w) -> {
+                            isNavigatingWithinApp = true;
+                            isInGameFlow = true;
+                            finish();
+                        });
+                        AlertDialog resultDialog = resultBuilder.create();
                         resultDialog.setOnShowListener(dialogInterface1 -> {
                             resultDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFFFFFFF);
                         });
@@ -649,19 +678,9 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void startLevelMusic() {
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-        if (!musicOn) {
-            MusicManager.stop();
-            return;
-        }
         int musicRes = getMusicResForDifficulty();
         MusicManager.setLooping(true);
-
-        // Only start if not already playing the correct music
-        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != musicRes) {
-            MusicManager.start(this, musicRes);
-        }
+        MusicManager.start(this, musicRes);
     }
 
     @Override

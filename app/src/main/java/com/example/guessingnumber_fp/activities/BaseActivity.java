@@ -21,18 +21,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     protected void startMenuMusic() {
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-
-        if (!musicOn) {
-            MusicManager.stop();
-            return;
-        }
-
-        isInGameFlow = false;
-        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != R.raw.bg_music) {
-            MusicManager.start(this, R.raw.bg_music);
-        }
+        // Removed bg_music and menu music logic
     }
 
     protected void startGameMusic() {
@@ -42,11 +31,6 @@ public class BaseActivity extends AppCompatActivity {
         if (!musicOn) {
             MusicManager.stop();
             return;
-        }
-
-        isInGameFlow = true;
-        if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != R.raw.bg_music_2) {
-            MusicManager.start(this, R.raw.bg_music_2);
         }
     }
 

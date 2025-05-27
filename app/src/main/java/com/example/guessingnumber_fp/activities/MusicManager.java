@@ -4,84 +4,90 @@ import android.content.Context;
 import android.media.MediaPlayer;
 import android.util.Log;
 
+/**
+ * Professional singleton music manager for background music in Android apps.
+ * Handles play, pause, resume, stop, and release, and avoids memory leaks.
+ */
 public class MusicManager {
-    private static MediaPlayer mediaPlayer;
+    private static final String TAG = "MusicManager";
+    private static MediaPlayer mediaPlayer = null;
     private static int currentResId = -1;
-    private static boolean shouldLoop = true;
     private static boolean isPaused = false;
-    private static Context appContext;
+    private static boolean shouldLoop = true;
+    private static Context appContext = null;
 
-    public static void start(Context context, int resId) {
+    private MusicManager() { /* Prevent instantiation */ }
+
+    /**
+     * Start playing the given music resource. If already playing the same, does nothing.
+     * @param context Any context (activity or app context)
+     * @param resId Resource ID of the music to play
+     */
+    public static synchronized void start(Context context, int resId) {
         try {
             appContext = context.getApplicationContext();
-
-            // If the same music is already playing, don't restart it
             if (mediaPlayer != null && currentResId == resId && mediaPlayer.isPlaying()) {
+                // Already playing the requested music
                 return;
             }
-
-            // If we have a previous player, clean it up properly
+            // Clean up previous player if needed
             if (mediaPlayer != null) {
                 try {
-                    if (mediaPlayer.isPlaying()) {
-                        mediaPlayer.stop();
-                    }
+                    mediaPlayer.stop();
+                } catch (Exception e) {
+                    Log.e(TAG, "Error stopping previous player: " + e.getMessage());
+                }
+                try {
                     mediaPlayer.release();
                 } catch (Exception e) {
-                    Log.e("Music", "Error cleaning up previous player: " + e.getMessage());
+                    Log.e(TAG, "Error releasing previous player: " + e.getMessage());
                 }
+                mediaPlayer = null;
             }
-
-            // Create and start new player
             mediaPlayer = MediaPlayer.create(appContext, resId);
             if (mediaPlayer != null) {
                 currentResId = resId;
                 mediaPlayer.setLooping(shouldLoop);
                 mediaPlayer.start();
                 isPaused = false;
-                Log.d("Music", "Started playing music: " + resId);
+                Log.d(TAG, "Started playing music: " + resId);
+            } else {
+                Log.e(TAG, "Failed to create MediaPlayer for resId: " + resId);
+                currentResId = -1;
             }
         } catch (Exception e) {
-            Log.e("Music", "Error in start(): " + e.getMessage());
+            Log.e(TAG, "Error in start(): " + e.getMessage());
             release();
         }
     }
 
-    public static void setLooping(boolean loop) {
-        shouldLoop = loop;
-        if (mediaPlayer != null) {
+    /**
+     * Pause the music if playing.
+     */
+    public static synchronized void pause() {
+        if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             try {
-                mediaPlayer.setLooping(loop);
+                mediaPlayer.pause();
+                isPaused = true;
+                Log.d(TAG, "Paused music: " + currentResId);
             } catch (Exception e) {
-                Log.e("Music", "Error in setLooping(): " + e.getMessage());
+                Log.e(TAG, "Error in pause(): " + e.getMessage());
             }
         }
     }
 
-    public static void pause() {
-        if (mediaPlayer != null) {
-            try {
-                if (mediaPlayer.isPlaying()) {
-                    Log.d("Music", "Pausing music: " + currentResId);
-                    mediaPlayer.pause();
-                    isPaused = true;
-                }
-            } catch (Exception e) {
-                Log.e("Music", "Error in pause(): " + e.getMessage());
-                release();
-            }
-        }
-    }
-
-    public static void resume() {
+    /**
+     * Resume the music if paused.
+     */
+    public static synchronized void resume() {
         if (mediaPlayer != null && isPaused) {
             try {
-                Log.d("Music", "Resuming music: " + currentResId);
                 mediaPlayer.start();
                 isPaused = false;
+                Log.d(TAG, "Resumed music: " + currentResId);
             } catch (Exception e) {
-                Log.e("Music", "Error in resume(): " + e.getMessage());
-                // If resume fails, try to restart the music
+                Log.e(TAG, "Error in resume(): " + e.getMessage());
+                // Try to restart if resume fails
                 if (appContext != null && currentResId != -1) {
                     start(appContext, currentResId);
                 }
@@ -89,50 +95,90 @@ public class MusicManager {
         }
     }
 
-    public static void stop() {
+    /**
+     * Stop and release the music player.
+     */
+    public static synchronized void stop() {
         if (mediaPlayer != null) {
             try {
-                Log.d("Music", "Stopping music: " + currentResId);
                 if (mediaPlayer.isPlaying()) {
                     mediaPlayer.stop();
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "Error in stop(): " + e.getMessage());
+            }
+            try {
                 mediaPlayer.release();
             } catch (Exception e) {
-                Log.e("Music", "Error in stop(): " + e.getMessage());
-            } finally {
-                mediaPlayer = null;
-                currentResId = -1;
-                isPaused = false;
+                Log.e(TAG, "Error in release(): " + e.getMessage());
+            }
+            mediaPlayer = null;
+            currentResId = -1;
+            isPaused = false;
+            Log.d(TAG, "Stopped and released music player");
+        }
+    }
+
+    /**
+     * Release all resources and clear context reference.
+     */
+    public static synchronized void release() {
+        stop();
+        appContext = null;
+        Log.d(TAG, "MusicManager released");
+    }
+
+    /**
+     * Set whether music should loop.
+     * @param loop true to loop, false otherwise
+     */
+    public static synchronized void setLooping(boolean loop) {
+        shouldLoop = loop;
+        if (mediaPlayer != null) {
+            try {
+                mediaPlayer.setLooping(loop);
+            } catch (Exception e) {
+                Log.e(TAG, "Error in setLooping(): " + e.getMessage());
             }
         }
     }
 
-    public static void release() {
-        Log.d("Music", "Releasing music resources: " + currentResId);
-        stop();
-        appContext = null;
-    }
-
-    public static boolean isPlaying() {
+    /**
+     * @return true if music is currently playing
+     */
+    public static synchronized boolean isPlaying() {
         try {
             return mediaPlayer != null && mediaPlayer.isPlaying();
         } catch (Exception e) {
-            Log.e("Music", "Error in isPlaying(): " + e.getMessage());
+            Log.e(TAG, "Error in isPlaying(): " + e.getMessage());
             return false;
         }
     }
 
-    public static int getCurrentMusic() {
+    /**
+     * @return the resource ID of the currently playing music, or -1 if none
+     */
+    public static synchronized int getCurrentMusic() {
         return currentResId;
     }
 
-    public static boolean isPaused() {
+    /**
+     * @return true if music is paused
+     */
+    public static synchronized boolean isPaused() {
         return isPaused;
     }
 
-    public static void switchMusic(Context context, int newResId) {
-        Log.d("Music", "Switching music from " + currentResId + " to " + newResId);
-        stop();
-        start(context, newResId);
+    /**
+     * Switch to a new music resource, stopping the current one if needed.
+     * @param context Any context
+     * @param newResId Resource ID of the new music
+     */
+    public static synchronized void switchMusic(Context context, int newResId) {
+        if (currentResId != newResId) {
+            start(context, newResId);
+        }
     }
+
+    // Optionally: add volume control, fade in/out, etc. as needed for your app
 }
