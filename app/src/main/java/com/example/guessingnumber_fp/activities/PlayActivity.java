@@ -677,6 +677,7 @@ public class PlayActivity extends BaseActivity {
         }
     }
 
+
     private void startLevelMusic() {
         int musicRes = getMusicResForDifficulty();
         MusicManager.setLooping(true);
