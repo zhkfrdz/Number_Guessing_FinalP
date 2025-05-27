@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.*;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.GradientDrawable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 import com.example.guessingnumber_fp.R;
@@ -40,7 +42,7 @@ public class PlayActivity extends BaseActivity {
 
     TextView tvLevel, tvRange, tvHint, tvHintMessage;
     EditText etGuess;
-    ImageView heart1, heart2, heart3;
+    ImageView heart1, heart2, heart3, imgCats;
     Button btnGuess, btnGiveUp, btnHint;
     ImageButton btnTryAgain;
     Handler handler = new Handler();
@@ -59,10 +61,10 @@ public class PlayActivity extends BaseActivity {
             getWindow().setStatusBarColor(0xFF000000);
             setContentView(R.layout.activity_play);
 
-            // Initialize background music for play activity
+            // Initialize sound preferences for play activity
             prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-            boolean musicOn = prefs.getBoolean("music_on", true);
-            MusicManager.setLooping(true);
+            // Music functionality removed, keeping only sound effects
+            MusicManager.stop();
 
             // Initialize UI components
             initializeUIComponents();
@@ -75,8 +77,10 @@ public class PlayActivity extends BaseActivity {
             if ("easy".equals(difficulty)) {
                 difficultyMax = 10;
             } else if ("medium".equals(difficulty)) {
-                difficultyMax = 50;
+                difficultyMax = 30;
             } else if ("hard".equals(difficulty)) {
+                difficultyMax = 50;
+            } else if ("impossible".equals(difficulty)) {
                 difficultyMax = 100;
             }
 
@@ -85,7 +89,7 @@ public class PlayActivity extends BaseActivity {
             originalRangeMessage = "We are thinking of a number between 1 and " + difficultyMax;
             if (tvRange != null) tvRange.setText(originalRangeMessage);
 
-            startLevelMusic();
+            // Music functionality removed
             startNewGame();
 
             setupClickListeners();
@@ -105,6 +109,7 @@ public class PlayActivity extends BaseActivity {
             heart1 = findViewById(R.id.heart1);
             heart2 = findViewById(R.id.heart2);
             heart3 = findViewById(R.id.heart3);
+            imgCats = findViewById(R.id.imgCats);
             btnGuess = findViewById(R.id.btnGuess);
             btnGiveUp = findViewById(R.id.btnGiveUp);
             btnHint = findViewById(R.id.btnHintButton);
@@ -232,6 +237,8 @@ public class PlayActivity extends BaseActivity {
             hints = 5;
         } else if ("hard".equals(difficulty)) {
             hints = 10;
+        } else if ("impossible".equals(difficulty)) {
+            hints = 15;
         }
 
         updateHearts();
@@ -259,6 +266,27 @@ public class PlayActivity extends BaseActivity {
         }
 
         if (tvRange != null) tvRange.setText(originalRangeMessage);
+
+        // Set the correct difficulty image
+        if (imgCats != null) {
+            switch (difficulty) {
+                case "easy":
+                    imgCats.setImageResource(R.drawable.easy);
+                    break;
+                case "medium":
+                    imgCats.setImageResource(R.drawable.medium);
+                    break;
+                case "hard":
+                    imgCats.setImageResource(R.drawable.hard);
+                    break;
+                case "impossible":
+                    imgCats.setImageResource(R.drawable.impossible);
+                    break;
+                default:
+                    imgCats.setImageResource(R.drawable.play);
+                    break;
+            }
+        }
 
         // Log the target number for debugging
         Log.d("PlayActivity", "New game started with target number: " + targetNumber);
@@ -381,8 +409,30 @@ public class PlayActivity extends BaseActivity {
         hearts = 3;
         updateHearts();
 
-        if (score % 3 == 0) {
+        // Award hints based on difficulty level and correct guesses
+        boolean earnedHint = false;
+
+        if ("easy".equals(difficulty) && score % 3 == 0) {
+            // Easy: +1 hint every 3 correct guesses
             hints++;
+            earnedHint = true;
+        } else if ("medium".equals(difficulty) && score % 2 == 0) {
+            // Medium: +1 hint every 2 correct guesses
+            hints++;
+            earnedHint = true;
+        } else if ("hard".equals(difficulty) && score % 2 == 0) {
+            // Hard: +1 hint every 2 correct guesses
+            hints++;
+            earnedHint = true;
+        } else if ("impossible".equals(difficulty)) {
+            // Impossible: 50% chance to gain +1 hint per correct guess
+            if (random.nextBoolean()) {
+                hints++;
+                earnedHint = true;
+            }
+        }
+
+        if (earnedHint) {
             prefs.edit().putInt("hints_" + difficulty + "_" + currentUser, hints).apply();
             if (isSoundOn()) {
                 Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
@@ -463,12 +513,20 @@ public class PlayActivity extends BaseActivity {
             imgParams.gravity = Gravity.CENTER;
             image.setLayoutParams(imgParams);
             dialogLayout.addView(image);
-
+            
+            // Add text with background color for better visibility
             TextView text = new TextView(this);
             text.setText("No lives left!");
             text.setTextSize(20);
             text.setGravity(Gravity.CENTER);
-            text.setPadding(0, 24, 0, 8);
+            text.setPadding(20, 16, 20, 16);
+            
+            // Create a background with rounded corners
+            GradientDrawable textBackground = new GradientDrawable();
+            textBackground.setCornerRadius(16);
+            textBackground.setColor(android.graphics.Color.parseColor("#333333"));
+            text.setBackground(textBackground);
+            
             // Match font and color to tvRange or fallback
             if (tvRange != null) {
                 text.setTypeface(tvRange.getTypeface());
@@ -478,13 +536,20 @@ public class PlayActivity extends BaseActivity {
                 text.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
             }
             dialogLayout.addView(text);
-
-            // Add the number reveal below
+            
+            // Add the number reveal below with background color
             TextView numberReveal = new TextView(this);
             numberReveal.setText("The number was: " + targetNumber);
             numberReveal.setTextSize(18);
             numberReveal.setGravity(Gravity.CENTER);
-            numberReveal.setPadding(0, 0, 0, 24);
+            numberReveal.setPadding(20, 16, 20, 16);
+            
+            // Create a background with rounded corners
+            GradientDrawable numberBackground = new GradientDrawable();
+            numberBackground.setCornerRadius(16);
+            numberBackground.setColor(android.graphics.Color.parseColor("#333333"));
+            numberReveal.setBackground(numberBackground);
+            
             if (tvRange != null) {
                 numberReveal.setTypeface(tvRange.getTypeface());
                 numberReveal.setTextColor(tvRange.getCurrentTextColor());
@@ -493,7 +558,7 @@ public class PlayActivity extends BaseActivity {
                 numberReveal.setTextColor(android.graphics.Color.parseColor("#FF6B4A"));
             }
             dialogLayout.addView(numberReveal);
-
+            
             // Custom button container
             LinearLayout buttonLayout = new LinearLayout(this);
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -664,23 +729,8 @@ public class PlayActivity extends BaseActivity {
         outState.putBoolean("hasGuessedThisRound", hasGuessedThisRound);
     }
 
-    private int getMusicResForDifficulty() {
-        switch (difficulty) {
-            case "easy":
-                return R.raw.ez_bg_music;
-            case "medium":
-                return R.raw.medium_bg_music;
-            case "hard":
-                return R.raw.hard_bg_music;
-            default:
-                return R.raw.ez_bg_music;
-        }
-    }
-
     private void startLevelMusic() {
-        int musicRes = getMusicResForDifficulty();
-        MusicManager.setLooping(true);
-        MusicManager.start(this, musicRes);
+        MusicManager.stop();
     }
 
     @Override

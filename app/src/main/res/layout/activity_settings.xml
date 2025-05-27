@@ -26,36 +26,14 @@
         android:layout_gravity="center"
         android:layout_marginBottom="32dp"/>
 
+    <!-- Music option removed, keeping only sound -->
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_marginBottom="24dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Music"
-            android:textColor="#fff"
-            android:textSize="18sp"
-            android:fontFamily="@font/poppins_medium"/>
-
-        <Switch
-            android:id="@+id/switchMusic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:thumbTint="#FF6B4A"
-            android:trackTint="#FFB199"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="32dp">
 
         <TextView
             android:layout_width="0dp"
@@ -73,6 +51,86 @@
             android:thumbTint="#FF6B4A"
             android:trackTint="#FFB199"/>
     </LinearLayout>
+    
+    <!-- Username Change Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Username"
+        android:textColor="#fff"
+        android:textSize="18sp"
+        android:fontFamily="@font/poppins_medium"
+        android:layout_marginBottom="8dp"/>
+        
+    <EditText
+        android:id="@+id/etNewUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="New Username"
+        android:textColorHint="#888"
+        android:textColor="#fff"
+        android:backgroundTint="#FF6B4A"
+        android:inputType="text"
+        android:fontFamily="@font/poppins_medium"
+        android:layout_marginBottom="16dp"/>
+    
+    <Button
+        android:id="@+id/btnChangeUsername"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Update Username"
+        android:backgroundTint="#FF6B4A"
+        android:textColor="#fff"
+        android:textSize="16sp"
+        android:fontFamily="@font/poppins_medium"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="24dp"/>
+    
+    <!-- Password Change Section -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Change Password"
+        android:textColor="#fff"
+        android:textSize="18sp"
+        android:fontFamily="@font/poppins_medium"
+        android:layout_marginBottom="8dp"/>
+        
+    <EditText
+        android:id="@+id/etNewPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="New Password"
+        android:textColorHint="#888"
+        android:textColor="#fff"
+        android:backgroundTint="#FF6B4A"
+        android:inputType="textPassword"
+        android:fontFamily="@font/poppins_medium"
+        android:layout_marginBottom="16dp"/>
+    
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
+        android:textColorHint="#888"
+        android:textColor="#fff"
+        android:backgroundTint="#FF6B4A"
+        android:inputType="textPassword"
+        android:fontFamily="@font/poppins_medium"
+        android:layout_marginBottom="16dp"/>
+    
+    <Button
+        android:id="@+id/btnChangePassword"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Update Password"
+        android:backgroundTint="#FF6B4A"
+        android:textColor="#fff"
+        android:textSize="16sp"
+        android:fontFamily="@font/poppins_medium"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_marginBottom="24dp"/>
 
     <Button
         android:id="@+id/btnLogout"

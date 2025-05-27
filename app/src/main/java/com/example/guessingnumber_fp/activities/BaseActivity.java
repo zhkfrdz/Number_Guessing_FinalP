@@ -9,7 +9,7 @@ import com.example.guessingnumber_fp.R;
 public class BaseActivity extends AppCompatActivity {
     protected boolean isNavigatingWithinApp = false;
     protected static boolean isInGameFlow = false;
-    private static int currentMusicRes = -1;
+    // Music functionality removed, keeping only sound effects
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,18 +20,15 @@ public class BaseActivity extends AppCompatActivity {
         getWindow().setStatusBarColor(0xFF000000);
     }
 
+    // Music functionality completely removed
     protected void startMenuMusic() {
-        // Removed bg_music and menu music logic
+        // Music functionality removed
+        MusicManager.stop();
     }
 
     protected void startGameMusic() {
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
-
-        if (!musicOn) {
-            MusicManager.stop();
-            return;
-        }
+        // Music functionality removed
+        MusicManager.stop();
     }
 
     @Override
@@ -46,25 +43,13 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
         
-        if (!musicOn) {
-            MusicManager.stop();
-            return;
-        }
-
         // Reset navigation flag first
         isNavigatingWithinApp = false;
-
-        // Then handle music based on game flow
-        if (isInGameFlow) {
-            Log.d("Music", "Resuming game flow music");
-            startGameMusic();
-        } else {
-            Log.d("Music", "Resuming menu flow music");
-            startMenuMusic();
-        }
+        
+        // Music functionality removed, only keeping sound effects
+        // Stop any music that might be playing
+        MusicManager.stop();
     }
 
     @Override
