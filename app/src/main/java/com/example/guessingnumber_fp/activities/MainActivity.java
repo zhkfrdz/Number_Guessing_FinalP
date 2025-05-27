@@ -9,7 +9,7 @@ import android.app.AlertDialog;
 
 public class MainActivity extends BaseActivity {
     private boolean isQuitting = false;
-    private MediaPlayer buttonClickPlayer; // ✅ ADDED
+    // No need for MediaPlayer instances with global SoundManager
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,9 +24,6 @@ public class MainActivity extends BaseActivity {
         }
 
         setContentView(R.layout.activity_main);
-
-        // ✅ Initialize click sound
-        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
 
         isInGameFlow = false;
 
@@ -61,19 +58,15 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    private void playButtonClickSound() { // ✅
-        if (buttonClickPlayer != null) {
-            buttonClickPlayer.start();
-        }
+    private void playButtonClickSound() {
+        // Use global SoundManager to play button click sound
+        SoundManager.playSound(this, R.raw.cat_buttons);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (buttonClickPlayer != null) {
-            buttonClickPlayer.release(); // ✅
-            buttonClickPlayer = null;
-        }
+        // No need to release MediaPlayer instances with global SoundManager
     }
 
     @Override
@@ -83,13 +76,9 @@ public class MainActivity extends BaseActivity {
     }
 
     private void showQuitDialog() {
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean soundOn = prefs.getBoolean("sound_on", true);
-        if (soundOn) {
-            isQuitting = true;
-            MusicManager.setLooping(false);
-            MusicManager.start(this, R.raw.quit_st);
-        }
+        // Play quit sound using global SoundManager
+        SoundManager.playSound(this, R.raw.quit_st);
+        isQuitting = true;
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Quit Game?")
@@ -100,9 +89,9 @@ public class MainActivity extends BaseActivity {
                     finishAffinity();
                 })
                 .setNegativeButton("No", (dialogInterface, which) -> {
-                    if (soundOn && isQuitting) {
-                        isQuitting = false;
-                    }
+                    // Play back button sound
+                    SoundManager.playSound(this, R.raw.cat_back_btn);
+                    isQuitting = false;
                 })
                 .create();
 

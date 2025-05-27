@@ -9,7 +9,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="32dp">
+        android:padding="32dp"
+        android:gravity="center_horizontal">
 
         <ImageButton
             android:id="@+id/btnBack"
@@ -40,21 +41,25 @@
             android:textSize="16sp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="8dp"/>
+            
+        <!-- Difficulty Selector -->
+        <Spinner
+            android:id="@+id/spinnerHighscoreDifficulty"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="32dp"
+            android:background="@drawable/edittext_white_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:popupBackground="#1A1A1A"
+            android:spinnerMode="dropdown"/>
 
-        <!-- Easy Level Scores -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EASY LEVEL"
-            android:textColor="#FF6B4A"
-            android:textSize="20sp"
-            android:fontFamily="@font/poppins_medium"
-            android:layout_marginTop="48dp"/>
-
+        <!-- Highscores Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="16dp"
             app:cardBackgroundColor="#1A1A1A"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp">
@@ -63,86 +68,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp">
 
                 <TextView
-                    android:id="@+id/tvHighscoreEasy"
+                    android:id="@+id/tvDifficultyTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="EASY LEVEL"
+                    android:textColor="#FF6B4A"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/poppins_medium"/>
+
+                <TextView
+                    android:id="@+id/tvHighscoreContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/poppins"
                     android:lineSpacingExtra="8dp"
                     android:textColor="#fff"
-                    android:textSize="16sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Medium Level Scores -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="MEDIUM LEVEL"
-            android:textColor="#FF6B4A"
-            android:textSize="20sp"
-            android:fontFamily="@font/poppins_medium"
-            android:layout_marginTop="32dp"/>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#1A1A1A"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/tvHighscoreMedium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/poppins"
-                    android:lineSpacingExtra="8dp"
-                    android:textColor="#fff"
-                    android:textSize="16sp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- Hard Level Scores -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="HARD LEVEL"
-            android:textColor="#FF6B4A"
-            android:textSize="20sp"
-            android:fontFamily="@font/poppins_medium"
-            android:layout_marginTop="32dp"/>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="#1A1A1A"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:id="@+id/tvHighscoreHard"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/poppins"
-                    android:lineSpacingExtra="8dp"
-                    android:textColor="#fff"
-                    android:textSize="16sp" />
+                    android:textSize="16sp"
+                    android:layout_marginTop="8dp" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

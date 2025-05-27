@@ -3,6 +3,7 @@ package com.example.guessingnumber_fp.activities;
 import android.content.Context;
 import android.media.MediaPlayer;
 import android.util.Log;
+import com.example.guessingnumber_fp.database.GameDataManager;
 
 /**
  * Professional singleton music manager for background music in Android apps.
@@ -26,6 +27,15 @@ public class MusicManager {
     public static synchronized void start(Context context, int resId) {
         try {
             appContext = context.getApplicationContext();
+            
+            // Check if music is enabled in GameDataManager
+            GameDataManager dataManager = GameDataManager.getInstance(context);
+            if (!dataManager.isMusicEnabled()) {
+                // If music is disabled, stop any playing music and return
+                stop();
+                return;
+            }
+            
             if (mediaPlayer != null && currentResId == resId && mediaPlayer.isPlaying()) {
                 // Already playing the requested music
                 return;
@@ -82,6 +92,15 @@ public class MusicManager {
     public static synchronized void resume() {
         if (mediaPlayer != null && isPaused) {
             try {
+                // Check if music is enabled in GameDataManager
+                if (appContext != null) {
+                    GameDataManager dataManager = GameDataManager.getInstance(appContext);
+                    if (!dataManager.isMusicEnabled()) {
+                        // If music is disabled, don't resume
+                        return;
+                    }
+                }
+                
                 mediaPlayer.start();
                 isPaused = false;
                 Log.d(TAG, "Resumed music: " + currentResId);
