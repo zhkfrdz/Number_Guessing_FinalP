@@ -12,14 +12,16 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.database.GameDataManager;
+import com.example.guessingnumber_fp.database.DatabaseMigrationHelper;
 
 public class SettingsActivity extends BaseActivity {
     private Switch switchMusic, switchSound;
     private Button btnLogout, btnSaveChanges;
     private EditText etNewUsername, etCurrentPassword, etNewPassword;
     private SharedPreferences prefs;
-    private MediaPlayer buttonClickPlayer;
-    private MediaPlayer backButtonClickPlayer; // 🎵 ADDED for back button
+    private GameDataManager dataManager;
+    // No need for MediaPlayer instances with global SoundManager
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,17 +38,17 @@ public class SettingsActivity extends BaseActivity {
         etCurrentPassword = findViewById(R.id.etCurrentPassword);
         etNewPassword = findViewById(R.id.etNewPassword);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        dataManager = GameDataManager.getInstance(this);
 
-        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
-        backButtonClickPlayer = MediaPlayer.create(this, R.raw.cat_back_btn); // 🎵 INIT
-
-        boolean musicOn = prefs.getBoolean("music_on", true);
-        boolean soundOn = prefs.getBoolean("sound_on", true);
+        // Use GameDataManager to get settings
+        boolean musicOn = dataManager.isMusicEnabled();
+        boolean soundOn = dataManager.isSoundEnabled();
         switchMusic.setChecked(musicOn);
         switchSound.setChecked(soundOn);
 
         switchMusic.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("music_on", isChecked).apply();
+            // Use GameDataManager to save setting
+            dataManager.setMusicEnabled(isChecked);
             if (isChecked) {
                 startMenuMusic();
             } else {
@@ -55,11 +57,12 @@ public class SettingsActivity extends BaseActivity {
         });
 
         switchSound.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            prefs.edit().putBoolean("sound_on", isChecked).apply();
+            // Use GameDataManager to save setting
+            dataManager.setSoundEnabled(isChecked);
         });
 
         // Get current username to display as hint
-        String currentUser = prefs.getString("current_user", "");
+        String currentUser = dataManager.getCurrentUser();
         etNewUsername.setHint("New Username (current: " + currentUser + ")");
         
         btnSaveChanges.setOnClickListener(v -> {
@@ -69,7 +72,8 @@ public class SettingsActivity extends BaseActivity {
         
         btnLogout.setOnClickListener(v -> {
             playButtonClickSound(); // 🔊 Standard click sound
-            prefs.edit().remove("current_user").apply();
+            // Use GameDataManager to handle logout
+            dataManager.setCurrentUser(""); // Clear current user
             startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
             finishAffinity();
         });
@@ -86,17 +90,13 @@ public class SettingsActivity extends BaseActivity {
     }
 
     private void playButtonClickSound() {
-        boolean soundOn = prefs.getBoolean("sound_on", true);
-        if (soundOn && buttonClickPlayer != null) {
-            buttonClickPlayer.start();
-        }
+        // Use global SoundManager to play button click sound
+        SoundManager.playSound(this, R.raw.cat_buttons);
     }
 
-    private void playBackButtonClickSound() { // 🎵 NEW METHOD
-        boolean soundOn = prefs.getBoolean("sound_on", true);
-        if (soundOn && backButtonClickPlayer != null) {
-            backButtonClickPlayer.start();
-        }
+    private void playBackButtonClickSound() {
+        // Use global SoundManager to play back button sound
+        SoundManager.playSound(this, R.raw.cat_back_btn);
     }
 
     @Override
@@ -109,14 +109,7 @@ public class SettingsActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (buttonClickPlayer != null) {
-            buttonClickPlayer.release();
-            buttonClickPlayer = null;
-        }
-        if (backButtonClickPlayer != null) {
-            backButtonClickPlayer.release();
-            backButtonClickPlayer = null;
-        }
+        // No need to release MediaPlayer instances with global SoundManager
     }
 
     @Override
@@ -179,13 +172,20 @@ public class SettingsActivity extends BaseActivity {
     }
     
     private void saveChanges() {
-        String currentUser = prefs.getString("current_user", "");
+        String currentUser = dataManager.getCurrentUser();
         String newUsername = etNewUsername.getText().toString().trim();
         String currentPassword = etCurrentPassword.getText().toString().trim();
         String newPassword = etNewPassword.getText().toString().trim();
         
         // Check if current password is correct
-        String savedPassword = prefs.getString("password_" + currentUser, "");
+        String savedPassword = "";
+        
+        // Try to get password from database if using SQLite
+        if (GameDataManager.getStorageMode() == GameDataManager.MODE_SQLITE) {
+            savedPassword = dataManager.getString("password_" + currentUser, "");
+        } else {
+            savedPassword = prefs.getString("password_" + currentUser, "");
+        }
         
         // If trying to change password
         if (!TextUtils.isEmpty(currentPassword) || !TextUtils.isEmpty(newPassword)) {
@@ -202,30 +202,47 @@ public class SettingsActivity extends BaseActivity {
             // Save new password
             if (!TextUtils.isEmpty(newUsername)) {
                 // If username is also changing, save password under new username
-                prefs.edit().putString("password_" + newUsername, newPassword).apply();
+                dataManager.putString("password_" + newUsername, newPassword);
             } else {
                 // Otherwise update password for current username
-                prefs.edit().putString("password_" + currentUser, newPassword).apply();
+                dataManager.putString("password_" + currentUser, newPassword);
             }
         }
         
         // If trying to change username
         if (!TextUtils.isEmpty(newUsername) && !newUsername.equals(currentUser)) {
             // Check if username already exists (except current user)
-            if (prefs.contains("password_" + newUsername)) {
+            boolean usernameExists = false;
+            
+            if (GameDataManager.getStorageMode() == GameDataManager.MODE_SQLITE) {
+                // Check in SQLite
+                usernameExists = dataManager.contains("password_" + newUsername);
+            } else {
+                // Check in SharedPreferences
+                usernameExists = prefs.contains("password_" + newUsername);
+            }
+            
+            if (usernameExists) {
                 Toast.makeText(this, "Username already exists", Toast.LENGTH_SHORT).show();
                 return;
             }
             
             // Transfer all game data from old username to new username
-            transferUserData(currentUser, newUsername);
+            if (GameDataManager.getStorageMode() == GameDataManager.MODE_SQLITE) {
+                // Use DatabaseMigrationHelper for SQLite transfers
+                DatabaseMigrationHelper migrationHelper = new DatabaseMigrationHelper(this);
+                migrationHelper.transferUserData(currentUser, newUsername);
+            } else {
+                // Use the original method for SharedPreferences
+                transferUserData(currentUser, newUsername);
+            }
             
             // Update username
-            prefs.edit().putString("current_user", newUsername).apply();
+            dataManager.setCurrentUser(newUsername);
             
             // If not changing password, copy current password to new username
             if (TextUtils.isEmpty(newPassword) && !TextUtils.isEmpty(savedPassword)) {
-                prefs.edit().putString("password_" + newUsername, savedPassword).apply();
+                dataManager.putString("password_" + newUsername, savedPassword);
             }
             
             // Update hint

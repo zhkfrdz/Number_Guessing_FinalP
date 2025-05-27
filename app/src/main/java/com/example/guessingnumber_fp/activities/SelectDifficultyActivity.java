@@ -9,8 +9,7 @@ import com.example.guessingnumber_fp.R;
 
 public class SelectDifficultyActivity extends BaseActivity {
 
-    private MediaPlayer buttonClickPlayer;
-    private MediaPlayer backButtonClickPlayer; // 🎵 ADDED
+    // No need for MediaPlayer instances with global SoundManager
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,10 +22,11 @@ public class SelectDifficultyActivity extends BaseActivity {
         LinearLayout cardImpossible = findViewById(R.id.cardImpossible);
         ImageButton btnBack = findViewById(R.id.btnBack);
 
-        isInGameFlow = true;
-
-        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
-        backButtonClickPlayer = MediaPlayer.create(this, R.raw.cat_back_btn); // 🎵 Initialize back button sound
+        // Explicitly set to false to ensure no music plays in this activity
+        isInGameFlow = false;
+        
+        // Explicitly stop any music that might be playing
+        MusicManager.stop();
 
         cardEasy.setOnClickListener(v -> {
             playButtonClickSound();
@@ -59,6 +59,7 @@ public class SelectDifficultyActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        // BaseActivity will handle music control
     }
 
     private void startGame(String difficulty, int max) {
@@ -70,27 +71,18 @@ public class SelectDifficultyActivity extends BaseActivity {
     }
 
     private void playButtonClickSound() {
-        if (buttonClickPlayer != null) {
-            buttonClickPlayer.start();
-        }
+        // Use global SoundManager to play button click sound
+        SoundManager.playSound(this, R.raw.cat_buttons);
     }
 
     private void playBackButtonClickSound() {
-        if (backButtonClickPlayer != null) {
-            backButtonClickPlayer.start();
-        }
+        // Use global SoundManager to play back button sound
+        SoundManager.playSound(this, R.raw.cat_back_btn);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (buttonClickPlayer != null) {
-            buttonClickPlayer.release();
-            buttonClickPlayer = null;
-        }
-        if (backButtonClickPlayer != null) {
-            backButtonClickPlayer.release();
-            backButtonClickPlayer = null;
-        }
+        // No need to release MediaPlayer instances with global SoundManager
     }
 }

@@ -9,11 +9,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.database.GameDataManager;
+import com.example.guessingnumber_fp.database.UserDAO;
 
 public class LoginActivity extends BaseActivity {
     private EditText etUsername, etPassword;
     private Button btnLogin;
     private SharedPreferences prefs;
+    private GameDataManager dataManager;
     private boolean isNavigatingWithinApp = false;
 
     @Override
@@ -27,6 +30,7 @@ public class LoginActivity extends BaseActivity {
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
+        dataManager = GameDataManager.getInstance(this);
 
         startMenuMusic();
 
@@ -39,10 +43,35 @@ public class LoginActivity extends BaseActivity {
                     Toast.makeText(LoginActivity.this, "Please enter username and password", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                // Save current user
-                prefs.edit().putString("current_user", username).apply();
-                // Optionally: Save password for demo (not secure for real apps)
-                prefs.edit().putString("password_" + username, password).apply();
+                
+                // Check if we're using SQLite or SharedPreferences
+                if (GameDataManager.getStorageMode() == GameDataManager.MODE_SQLITE) {
+                    // Use UserDAO for authentication
+                    UserDAO userDAO = new UserDAO(LoginActivity.this);
+                    
+                    // Check if user exists
+                    if (!userDAO.userExists(username)) {
+                        // Create new user if not exists
+                        userDAO.createUser(username);
+                        // Save password
+                        dataManager.putString("password_" + username, password);
+                    } else {
+                        // Verify password
+                        String savedPassword = dataManager.getString("password_" + username, "");
+                        if (!password.equals(savedPassword)) {
+                            Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                    }
+                } else {
+                    // Legacy SharedPreferences approach
+                    // Save password for this user
+                    prefs.edit().putString("password_" + username, password).apply();
+                }
+                
+                // Save current user using GameDataManager
+                dataManager.setCurrentUser(username);
+                
                 // Go to MainActivity
                 isNavigatingWithinApp = true;
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -64,8 +93,9 @@ public class LoginActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         isNavigatingWithinApp = false;
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
+        
+        // Use GameDataManager to check music settings
+        boolean musicOn = dataManager.isMusicEnabled();
         if (musicOn) {
             MusicManager.resume();
         }

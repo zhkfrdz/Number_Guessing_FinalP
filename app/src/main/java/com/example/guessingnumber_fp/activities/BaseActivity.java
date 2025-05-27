@@ -5,11 +5,15 @@ import android.os.Bundle;
 import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
+import com.example.guessingnumber_fp.database.GameDataManager;
 
 public class BaseActivity extends AppCompatActivity {
     protected boolean isNavigatingWithinApp = false;
     protected static boolean isInGameFlow = false;
     private static int currentMusicRes = -1;
+    
+    // Database manager for SQLite operations
+    protected GameDataManager dataManager;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,19 +22,47 @@ public class BaseActivity extends AppCompatActivity {
             getSupportActionBar().hide();
         }
         getWindow().setStatusBarColor(0xFF000000);
+        
+        // Initialize database manager
+        dataManager = GameDataManager.getInstance(this);
     }
 
     protected void startMenuMusic() {
-        // Removed bg_music and menu music logic
+        // No music in menu screens, always stop music when in menu
+        MusicManager.stop();
     }
 
     protected void startGameMusic() {
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
+        // Use GameDataManager to check music settings
+        boolean musicOn = dataManager.isMusicEnabled();
 
         if (!musicOn) {
             MusicManager.stop();
             return;
+        }
+        
+        // Get current difficulty from preferences
+        String difficulty = dataManager.getString("current_difficulty", "easy");
+        
+        // Play appropriate music based on difficulty
+        if (isInGameFlow) {
+            switch (difficulty) {
+                case "easy":
+                    MusicManager.start(this, R.raw.ez_bg_music);
+                    break;
+                case "medium":
+                    MusicManager.start(this, R.raw.medium_bg_music);
+                    break;
+                case "hard":
+                    MusicManager.start(this, R.raw.hardy);
+                    break;
+                case "impossible":
+                    MusicManager.start(this, R.raw.hard_bg_music);
+                    break;
+                default:
+                    MusicManager.start(this, R.raw.ez_bg_music);
+                    break;
+            }
         }
     }
 
@@ -46,8 +78,8 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-        boolean musicOn = prefs.getBoolean("music_on", true);
+        // Use GameDataManager to check music settings
+        boolean musicOn = dataManager.isMusicEnabled();
         
         if (!musicOn) {
             MusicManager.stop();
