@@ -36,7 +36,10 @@ public class HighscoresActivity extends BaseActivity {
 
     private void displayLeaderboard(SharedPreferences prefs, String difficulty, int textViewId) {
         java.util.Map<String, ?> allEntries = prefs.getAll();
-        java.util.List<UserScore> userScores = new java.util.ArrayList<>();
+        java.util.Map<String, Integer> bestScores = new java.util.HashMap<>();
+        String currentUser = prefs.getString("current_user", "");
+        
+        // First pass: collect all scores
         for (String key : allEntries.keySet()) {
             if (key.startsWith("highscore_" + difficulty + "_") && !key.equals("highscore_" + difficulty + "_user")) {
                 String username = key.substring(("highscore_" + difficulty + "_").length());
@@ -44,8 +47,18 @@ public class HighscoresActivity extends BaseActivity {
                 try {
                     score = Integer.parseInt(allEntries.get(key).toString());
                 } catch (Exception ignored) {}
-                userScores.add(new UserScore(username, score));
+                
+                // Keep the highest score for each username
+                if (!bestScores.containsKey(username) || score > bestScores.get(username)) {
+                    bestScores.put(username, score);
+                }
             }
+        }
+        
+        // Convert to list for sorting
+        java.util.List<UserScore> userScores = new java.util.ArrayList<>();
+        for (java.util.Map.Entry<String, Integer> entry : bestScores.entrySet()) {
+            userScores.add(new UserScore(entry.getKey(), entry.getValue()));
         }
 
         java.util.Collections.sort(userScores, (a, b) -> Integer.compare(b.score, a.score));

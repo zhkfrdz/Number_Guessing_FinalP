@@ -57,6 +57,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground">
 
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -108,6 +109,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground">
 
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -127,7 +129,7 @@
                     android:id="@+id/tvMediumRange"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1-50 range"
+                    android:text="1-30 range"
                     android:textColor="#888"
                     android:textSize="14sp"
                     android:layout_marginTop="4dp" />
@@ -159,6 +161,7 @@
             android:focusable="true"
             android:foreground="?attr/selectableItemBackground">
 
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -178,7 +181,7 @@
                     android:id="@+id/tvHardRange"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1-100 range"
+                    android:text="1-50 range"
                     android:textColor="#888"
                     android:textSize="14sp"
                     android:layout_marginTop="4dp" />
@@ -196,5 +199,57 @@
                 android:fontFamily="@font/audiowide" />
         </LinearLayout>
 
+        <!-- IMPOSSIBLE -->
+        <LinearLayout
+            android:id="@+id/cardImpossible"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/card_border_orange"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvImpossible"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/audiowide"
+                    android:text="IMPOSSIBLE"
+                    android:textColor="#fff"
+                    android:textSize="24sp" />
+
+                <TextView
+                    android:id="@+id/tvImpossibleRange"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1-100 range"
+                    android:textColor="#888"
+                    android:textSize="14sp"
+                    android:layout_marginTop="4dp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/badgeImpossible"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@drawable/circle_orange"
+                android:gravity="center"
+                android:text="4"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:fontFamily="@font/audiowide" />
+        </LinearLayout>
+
     </LinearLayout>
-</ScrollView> 
+</ScrollView>
