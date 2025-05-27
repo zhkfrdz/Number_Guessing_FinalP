@@ -75,8 +75,10 @@ public class PlayActivity extends BaseActivity {
             if ("easy".equals(difficulty)) {
                 difficultyMax = 10;
             } else if ("medium".equals(difficulty)) {
-                difficultyMax = 50;
+                difficultyMax = 30;
             } else if ("hard".equals(difficulty)) {
+                difficultyMax = 50;
+            } else if ("impossible".equals(difficulty)) {
                 difficultyMax = 100;
             }
 
@@ -84,6 +86,28 @@ public class PlayActivity extends BaseActivity {
             if (tvLevel != null) tvLevel.setText(levelText);
             originalRangeMessage = "We are thinking of a number between 1 and " + difficultyMax;
             if (tvRange != null) tvRange.setText(originalRangeMessage);
+            
+            // Set the appropriate difficulty image
+            ImageView imgCats = findViewById(R.id.imgCats);
+            if (imgCats != null) {
+                switch (difficulty) {
+                    case "easy":
+                        imgCats.setImageResource(R.drawable.easy);
+                        break;
+                    case "medium":
+                        imgCats.setImageResource(R.drawable.medium);
+                        break;
+                    case "hard":
+                        imgCats.setImageResource(R.drawable.hard);
+                        break;
+                    case "impossible":
+                        imgCats.setImageResource(R.drawable.impossible);
+                        break;
+                    default:
+                        imgCats.setImageResource(R.drawable.play);
+                        break;
+                }
+            }
 
             startLevelMusic();
             startNewGame();
@@ -672,6 +696,8 @@ public class PlayActivity extends BaseActivity {
                 return R.raw.medium_bg_music;
             case "hard":
                 return R.raw.hard_bg_music;
+            case "impossible":
+                return R.raw.hard_bg_music; // Using hard music for impossible until a specific one is added
             default:
                 return R.raw.ez_bg_music;
         }

@@ -20,6 +20,7 @@ public class SelectDifficultyActivity extends BaseActivity {
         LinearLayout cardEasy = findViewById(R.id.cardEasy);
         LinearLayout cardMedium = findViewById(R.id.cardMedium);
         LinearLayout cardHard = findViewById(R.id.cardHard);
+        LinearLayout cardImpossible = findViewById(R.id.cardImpossible);
         ImageButton btnBack = findViewById(R.id.btnBack);
 
         isInGameFlow = true;
@@ -34,12 +35,17 @@ public class SelectDifficultyActivity extends BaseActivity {
 
         cardMedium.setOnClickListener(v -> {
             playButtonClickSound();
-            startGame("medium", 50);
+            startGame("medium", 30);
         });
 
         cardHard.setOnClickListener(v -> {
             playButtonClickSound();
-            startGame("hard", 100);
+            startGame("hard", 50);
+        });
+        
+        cardImpossible.setOnClickListener(v -> {
+            playButtonClickSound();
+            startGame("impossible", 100);
         });
 
         btnBack.setOnClickListener(v -> {
