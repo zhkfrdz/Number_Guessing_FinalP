@@ -1,18 +1,16 @@
 package com.example.guessingnumber_fp.activities;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.MediaPlayer; // ADDED
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.example.guessingnumber_fp.R;
-import com.example.guessingnumber_fp.activities.MusicManager;
 
 public class SelectDifficultyActivity extends BaseActivity {
-    // private static final int DIFFICULTY_MUSIC = R.raw.bg_music_2;
 
-    private MediaPlayer buttonClickPlayer; // ADDED
+    private MediaPlayer buttonClickPlayer;
+    private MediaPlayer backButtonClickPlayer; // 🎵 ADDED
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,29 +22,28 @@ public class SelectDifficultyActivity extends BaseActivity {
         LinearLayout cardHard = findViewById(R.id.cardHard);
         ImageButton btnBack = findViewById(R.id.btnBack);
 
-        // This is part of the game flow
         isInGameFlow = true;
-        // startSelectDifficultyMusic();
 
-        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons); // ADDED
+        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
+        backButtonClickPlayer = MediaPlayer.create(this, R.raw.cat_back_btn); // 🎵 Initialize back button sound
 
         cardEasy.setOnClickListener(v -> {
-            playButtonClickSound(); // ADDED
+            playButtonClickSound();
             startGame("easy", 10);
         });
 
         cardMedium.setOnClickListener(v -> {
-            playButtonClickSound(); // ADDED
+            playButtonClickSound();
             startGame("medium", 50);
         });
 
         cardHard.setOnClickListener(v -> {
-            playButtonClickSound(); // ADDED
+            playButtonClickSound();
             startGame("hard", 100);
         });
 
         btnBack.setOnClickListener(v -> {
-            playButtonClickSound(); // ADDED
+            playBackButtonClickSound(); // 🔊 Play back button sound
             isNavigatingWithinApp = true;
             isInGameFlow = false;
             finish();
@@ -56,8 +53,6 @@ public class SelectDifficultyActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Remove background music logic from SelectDifficultyActivity
-        // No MusicManager.start() here
     }
 
     private void startGame(String difficulty, int max) {
@@ -68,33 +63,28 @@ public class SelectDifficultyActivity extends BaseActivity {
         startActivity(intent);
     }
 
-    private void playButtonClickSound() { // ADDED
+    private void playButtonClickSound() {
         if (buttonClickPlayer != null) {
             buttonClickPlayer.start();
         }
     }
 
+    private void playBackButtonClickSound() {
+        if (backButtonClickPlayer != null) {
+            backButtonClickPlayer.start();
+        }
+    }
+
     @Override
-    protected void onDestroy() { // ADDED
+    protected void onDestroy() {
         super.onDestroy();
         if (buttonClickPlayer != null) {
             buttonClickPlayer.release();
             buttonClickPlayer = null;
         }
+        if (backButtonClickPlayer != null) {
+            backButtonClickPlayer.release();
+            backButtonClickPlayer = null;
+        }
     }
-
-    // private void startSelectDifficultyMusic() {
-    //     SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
-    //     boolean musicOn = prefs.getBoolean("music_on", true);
-    //     if (!musicOn) {
-    //         MusicManager.stop();
-    //         return;
-    //     }
-
-    //     // Only start if not already playing the correct music
-    //     if (!MusicManager.isPlaying() || MusicManager.getCurrentMusic() != DIFFICULTY_MUSIC) {
-    //         MusicManager.setLooping(true);
-    //         MusicManager.start(this, DIFFICULTY_MUSIC);
-    //     }
-    // }
 }
