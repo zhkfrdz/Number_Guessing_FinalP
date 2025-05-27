@@ -23,7 +23,7 @@
         android:fontFamily="@font/audiowide"
         android:text="Guess the Account"
         android:textColor="#fff"
-        android:textSize="28sp" />
+        android:textSize="24sp" />
 
     <TextView
         android:layout_width="wrap_content"
