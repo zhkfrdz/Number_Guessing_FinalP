@@ -1,14 +1,15 @@
 package com.example.guessingnumber_fp.activities;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer; // ✅ ADDED
 import android.os.Bundle;
-import android.widget.Button;
 import com.example.guessingnumber_fp.R;
+import android.app.AlertDialog;
 
 public class MainActivity extends BaseActivity {
     private boolean isQuitting = false;
+    private MediaPlayer buttonClickPlayer; // ✅ ADDED
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,50 +18,71 @@ public class MainActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         String currentUser = prefs.getString("current_user", null);
         if (currentUser == null) {
-            // No user logged in, go to login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
         setContentView(R.layout.activity_main);
-        
-        // Ensure we're in menu flow
+
+        // ✅ Initialize click sound
+        buttonClickPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
+
         isInGameFlow = false;
-        // No background music logic in MainActivity
 
         findViewById(R.id.btnPlay).setOnClickListener(v -> {
+            playButtonClickSound(); // ✅
             isNavigatingWithinApp = true;
-            isInGameFlow = true; // Set game flow before starting SelectDifficultyActivity
+            isInGameFlow = true;
             startActivity(new Intent(this, SelectDifficultyActivity.class));
         });
+
         findViewById(R.id.btnHighscores).setOnClickListener(v -> {
+            playButtonClickSound(); // ✅
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, HighscoresActivity.class));
         });
+
         findViewById(R.id.btnStats).setOnClickListener(v -> {
+            playButtonClickSound(); // ✅
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, StatsActivity.class));
         });
+
         findViewById(R.id.btnSettings).setOnClickListener(v -> {
+            playButtonClickSound(); // ✅
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, SettingsActivity.class));
         });
+
         findViewById(R.id.btnQuit).setOnClickListener(v -> {
-            showQuitDialog();
+            // ❌ DO NOT PLAY BUTTON SOUND HERE
+            showQuitDialog(); // handled separately
         });
+    }
+
+    private void playButtonClickSound() { // ✅
+        if (buttonClickPlayer != null) {
+            buttonClickPlayer.start();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (buttonClickPlayer != null) {
+            buttonClickPlayer.release(); // ✅
+            buttonClickPlayer = null;
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         isNavigatingWithinApp = false;
-        // If not quitting, ensure proper music is playing
-        // No background music logic in MainActivity
     }
 
     private void showQuitDialog() {
-        // Play quit sound if sound is enabled
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         boolean soundOn = prefs.getBoolean("sound_on", true);
         if (soundOn) {
@@ -75,22 +97,20 @@ public class MainActivity extends BaseActivity {
                 .setIcon(R.drawable.play)
                 .setPositiveButton("Yes", (dialogInterface, which) -> {
                     MusicManager.release();
-                    finishAffinity(); // Closes all activities and exits the app
+                    finishAffinity();
                 })
                 .setNegativeButton("No", (dialogInterface, which) -> {
                     if (soundOn && isQuitting) {
-                        // Restore background music if not quitting
                         isQuitting = false;
-                        // No background music logic in MainActivity
                     }
                 })
                 .create();
-        
+
         dialog.setOnShowListener(dialogInterface -> {
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(0xFFFF6B4A);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(0xFFFF6B4A);
         });
-        
+
         dialog.show();
     }
 
