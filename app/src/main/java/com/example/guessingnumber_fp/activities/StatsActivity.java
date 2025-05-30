@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.widget.TextView;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
+import com.example.guessingnumber_fp.activities.SoundManager;
 
 import java.util.Map;
 
@@ -78,6 +79,7 @@ public class StatsActivity extends BaseActivity {
         }
 
         ((ImageButton)findViewById(R.id.btnBackStats)).setOnClickListener(v -> {
+            SoundManager.playSound(this, R.raw.cat_back_btn);
             isNavigatingWithinApp = true;
             finish();
         });
