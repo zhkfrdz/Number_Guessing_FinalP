@@ -30,6 +30,7 @@
         <activity android:name=".activities.StatsActivity" />
         <activity android:name=".activities.HighscoresActivity" />
         <activity android:name=".activities.SettingsActivity" />
+        <activity android:name=".activities.RegisterActivity" />
 
     </application>
 

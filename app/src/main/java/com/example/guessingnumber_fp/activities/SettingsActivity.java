@@ -73,7 +73,7 @@ public class SettingsActivity extends BaseActivity {
         btnLogout.setOnClickListener(v -> {
             playButtonClickSound(); // 🔊 Standard click sound
             // Use GameDataManager to handle logout
-            dataManager.setCurrentUser(""); // Clear current user
+            dataManager.remove("current_user"); // Remove current user key
             startActivity(new Intent(SettingsActivity.this, LoginActivity.class));
             finishAffinity();
         });

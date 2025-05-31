@@ -198,7 +198,10 @@ public class PlayActivity extends BaseActivity {
                 }
                 // If button says "Back to Menu", just go back to the difficulty selection screen
                 isNavigatingWithinApp = true;
-                isInGameFlow = true; // Stay in game flow for SelectDifficultyActivity
+                isInGameFlow = false;
+                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 finish();
             } else {
                 // Play give up button sound
@@ -803,7 +806,10 @@ public class PlayActivity extends BaseActivity {
                 
                 dialog.dismiss();
                 isNavigatingWithinApp = true;
-                isInGameFlow = true;
+                isInGameFlow = false;
+                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 finish();
             });
             dialog.show();
@@ -828,7 +834,10 @@ public class PlayActivity extends BaseActivity {
         // If game is over (no hearts left), just return to select difficulty
         if (hearts <= 0) {
             isNavigatingWithinApp = true;
-            isInGameFlow = true;
+            isInGameFlow = false;
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
             finish();
             return;
         }
@@ -990,14 +999,20 @@ public class PlayActivity extends BaseActivity {
                     
                     resultDialog.dismiss();
                     isNavigatingWithinApp = true;
-                    isInGameFlow = true;
+                    isInGameFlow = false;
+                    Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                     finish();
                 });
                 
                 resultDialog.show();
             } else {
                 isNavigatingWithinApp = true;
-                isInGameFlow = true;
+                isInGameFlow = false;
+                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
                 finish();
             }
         });
