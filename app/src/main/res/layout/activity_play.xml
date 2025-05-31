@@ -101,7 +101,7 @@
             android:paddingHorizontal="16dp"
             android:text="We are thinking of a number between 1 and 50"
             android:textColor="#FF6B4A"
-            android:textSize="18sp"
+            android:textSize="15sp"
             app:layout_constraintTop_toBottomOf="@id/imgCats"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -206,7 +206,7 @@
         <TextView
             android:id="@+id/tvHintMessage"
             android:layout_width="165dp"
-            android:layout_height="139dp"
+            android:layout_height="130dp"
             android:layout_marginEnd="4dp"
             android:layout_marginBottom="6dp"
             android:background="@drawable/bubble"
@@ -217,7 +217,7 @@
             android:padding="20dp"
             android:textAlignment="center"
             android:textColor="#000000"
-            android:textSize="15sp"
+            android:textSize="12sp"
             android:visibility="invisible"
             app:layout_constraintTop_toTopOf="@id/heartsContainer"
             app:layout_constraintBottom_toBottomOf="@id/imgCats"

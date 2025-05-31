@@ -13,9 +13,9 @@ import com.example.guessingnumber_fp.database.GameDataManager;
 import com.example.guessingnumber_fp.database.UserDAO;
 import com.example.guessingnumber_fp.activities.SoundManager;
 
-public class LoginActivity extends BaseActivity {
-    private EditText etUsername, etPassword;
-    private Button btnLogin, btnGoToRegister;
+public class RegisterActivity extends BaseActivity {
+    private EditText etRegisterUsername, etRegisterPassword;
+    private Button btnRegister, btnGoToLogin;
     private SharedPreferences prefs;
     private GameDataManager dataManager;
     private boolean isNavigatingWithinApp = false;
@@ -23,72 +23,61 @@ public class LoginActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
         if (getSupportActionBar() != null) getSupportActionBar().hide();
         getWindow().setStatusBarColor(0xFF000000);
 
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
-        btnLogin = findViewById(R.id.btnLogin);
-        btnGoToRegister = findViewById(R.id.btnGoToRegister);
+        etRegisterUsername = findViewById(R.id.etRegisterUsername);
+        etRegisterPassword = findViewById(R.id.etRegisterPassword);
+        btnRegister = findViewById(R.id.btnRegister);
+        btnGoToLogin = findViewById(R.id.btnGoToLogin);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         dataManager = GameDataManager.getInstance(this);
 
         startMenuMusic();
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SoundManager.playSound(LoginActivity.this, R.raw.cat_buttons);
-                String username = etUsername.getText().toString().trim();
-                String password = etPassword.getText().toString().trim();
+                SoundManager.playSound(RegisterActivity.this, R.raw.cat_buttons);
+                String username = etRegisterUsername.getText().toString().trim();
+                String password = etRegisterPassword.getText().toString().trim();
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password)) {
-                    Toast.makeText(LoginActivity.this, "Please enter username and password", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Please enter username and password", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                
-                // Check if we're using SQLite or SharedPreferences
+
                 if (GameDataManager.getStorageMode() == GameDataManager.MODE_SQLITE) {
-                    // Use UserDAO for authentication
-                    UserDAO userDAO = new UserDAO(LoginActivity.this);
-                    
-                    // Check if user exists
-                    if (!userDAO.userExists(username)) {
-                        // Create new user if not exists
-                        userDAO.createUser(username);
-                        // Save password
-                        dataManager.putString("password_" + username, password);
+                    UserDAO userDAO = new UserDAO(RegisterActivity.this);
+                    if (userDAO.userExists(username)) {
+                        Toast.makeText(RegisterActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
+                        return;
                     } else {
-                        // Verify password
-                        String savedPassword = dataManager.getString("password_" + username, "");
-                        if (!password.equals(savedPassword)) {
-                            Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+                        userDAO.createUser(username);
+                        dataManager.putString("password_" + username, password);
                     }
                 } else {
-                    // Legacy SharedPreferences approach
-                    // Save password for this user
-                    prefs.edit().putString("password_" + username, password).apply();
+                    if (prefs.contains("password_" + username)) {
+                        Toast.makeText(RegisterActivity.this, "Username already exists", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else {
+                        prefs.edit().putString("password_" + username, password).apply();
+                    }
                 }
-                
-                // Save current user using GameDataManager
-                dataManager.setCurrentUser(username);
-                
-                // Go to MainActivity
+
                 isNavigatingWithinApp = true;
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();
             }
         });
 
-        btnGoToRegister.setOnClickListener(new View.OnClickListener() {
+        btnGoToLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SoundManager.playSound(LoginActivity.this, R.raw.cat_buttons);
+                SoundManager.playSound(RegisterActivity.this, R.raw.cat_buttons);
                 isNavigatingWithinApp = true;
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();
             }
@@ -107,8 +96,6 @@ public class LoginActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         isNavigatingWithinApp = false;
-        
-        // Use GameDataManager to check music settings
         boolean musicOn = dataManager.isMusicEnabled();
         if (musicOn) {
             MusicManager.resume();
@@ -122,4 +109,4 @@ public class LoginActivity extends BaseActivity {
             MusicManager.release();
         }
     }
-}
+} 

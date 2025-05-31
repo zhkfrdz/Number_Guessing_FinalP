@@ -21,21 +21,21 @@
         android:layout_gravity="center"
         android:layout_marginTop="24dp"
         android:fontFamily="@font/audiowide"
-        android:text="Guess the Account"
+        android:text="Register Account"
         android:textColor="#fff"
         android:textSize="24sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Login to your account"
+        android:text="Create a new account"
         android:textColor="#FF6B4A"
         android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:layout_gravity="center"/>
 
     <EditText
-        android:id="@+id/etUsername"
+        android:id="@+id/etRegisterUsername"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginTop="32dp"
@@ -48,7 +48,7 @@
         android:fontFamily="@font/poppins_medium"/>
 
     <EditText
-        android:id="@+id/etPassword"
+        android:id="@+id/etRegisterPassword"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_marginTop="16dp"
@@ -62,10 +62,10 @@
         android:fontFamily="@font/poppins_medium"/>
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnRegister"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="Login"
+        android:text="Register"
         android:layout_marginTop="32dp"
         android:backgroundTint="#FF6B4A"
         android:textColor="#fff"
@@ -75,10 +75,10 @@
         style="@style/Widget.MaterialComponents.Button"/>
 
     <Button
-        android:id="@+id/btnGoToRegister"
+        android:id="@+id/btnGoToLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Don't have an account? Register"
+        android:text="Already have an account? Login"
         android:layout_marginTop="16dp"
         android:backgroundTint="#333333"
         android:textColor="#fff"
@@ -86,4 +86,4 @@
         android:fontFamily="@font/poppins_medium"
         style="@style/Widget.MaterialComponents.Button"/>
 
-</LinearLayout>
+</LinearLayout> 
