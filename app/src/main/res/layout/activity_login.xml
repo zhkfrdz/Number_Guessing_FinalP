@@ -56,10 +56,20 @@
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingEnd="48dp"
         android:textColor="#fff"
         android:textColorHint="#ccc"
         android:fontFamily="@font/poppins_medium"/>
+
+    <ImageView
+        android:id="@+id/ivTogglePasswordLogin"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="-40dp"
+        android:src="@drawable/ic_eye_closed"
+        android:contentDescription="Show/Hide Password"/>
 
     <Button
         android:id="@+id/btnLogin"

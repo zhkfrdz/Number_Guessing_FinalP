@@ -117,6 +117,16 @@
         android:inputType="textPassword"
         android:layout_marginBottom="8dp"/>
 
+    <ImageView
+        android:id="@+id/ivToggleCurrentPassword"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="-40dp"
+        android:src="@drawable/ic_eye_closed"
+        android:contentDescription="Show/Hide Password"/>
+
     <EditText
         android:id="@+id/etNewPassword"
         android:layout_width="match_parent"
@@ -127,6 +137,16 @@
         android:backgroundTint="#FF6B4A"
         android:inputType="textPassword"
         android:layout_marginBottom="16dp"/>
+
+    <ImageView
+        android:id="@+id/ivToggleNewPassword"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="-40dp"
+        android:src="@drawable/ic_eye_closed"
+        android:contentDescription="Show/Hide Password"/>
 
     <Button
         android:id="@+id/btnSaveChanges"

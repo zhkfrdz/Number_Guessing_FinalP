@@ -52,6 +52,12 @@ public class MainActivity extends BaseActivity {
             startActivity(new Intent(this, SettingsActivity.class));
         });
 
+        findViewById(R.id.btnHelp).setOnClickListener(v -> {
+            playButtonClickSound();
+            isNavigatingWithinApp = true;
+            startActivity(new Intent(this, HelpActivity.class));
+        });
+
         findViewById(R.id.btnQuit).setOnClickListener(v -> {
             // ❌ DO NOT PLAY BUTTON SOUND HERE
             showQuitDialog(); // handled separately

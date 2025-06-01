@@ -31,6 +31,7 @@
         <activity android:name=".activities.HighscoresActivity" />
         <activity android:name=".activities.SettingsActivity" />
         <activity android:name=".activities.RegisterActivity" />
+        <activity android:name=".activities.HelpActivity" />
 
     </application>
 
