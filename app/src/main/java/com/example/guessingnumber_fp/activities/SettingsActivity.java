@@ -58,7 +58,7 @@ public class SettingsActivity extends BaseActivity {
         switchSound.setChecked(soundOn);
 
         switchMusic.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Use GameDataManager to save setting
+            playToggleSound();
             dataManager.setMusicEnabled(isChecked);
             if (isChecked) {
                 startMenuMusic();
@@ -68,7 +68,7 @@ public class SettingsActivity extends BaseActivity {
         });
 
         switchSound.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // Use GameDataManager to save setting
+            playToggleSound();
             dataManager.setSoundEnabled(isChecked);
         });
 
@@ -100,24 +100,26 @@ public class SettingsActivity extends BaseActivity {
         }
 
         ivToggleCurrentPassword.setOnClickListener(v -> {
+            playToggleSound();
             isCurrentPasswordVisible = !isCurrentPasswordVisible;
             if (isCurrentPasswordVisible) {
                 etCurrentPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                ivToggleCurrentPassword.setImageResource(R.drawable.ic_eye_open);
+                ivToggleCurrentPassword.setImageResource(R.drawable.show);
             } else {
                 etCurrentPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                ivToggleCurrentPassword.setImageResource(R.drawable.ic_eye_closed);
+                ivToggleCurrentPassword.setImageResource(R.drawable.hide);
             }
             etCurrentPassword.setSelection(etCurrentPassword.getText().length());
         });
         ivToggleNewPassword.setOnClickListener(v -> {
+            playToggleSound();
             isNewPasswordVisible = !isNewPasswordVisible;
             if (isNewPasswordVisible) {
                 etNewPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                ivToggleNewPassword.setImageResource(R.drawable.ic_eye_open);
+                ivToggleNewPassword.setImageResource(R.drawable.show);
             } else {
                 etNewPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                ivToggleNewPassword.setImageResource(R.drawable.ic_eye_closed);
+                ivToggleNewPassword.setImageResource(R.drawable.hide);
             }
             etNewPassword.setSelection(etNewPassword.getText().length());
         });
@@ -339,6 +341,14 @@ public class SettingsActivity extends BaseActivity {
             return hexString.toString();
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
+        }
+    }
+
+    private void playToggleSound() {
+        MediaPlayer mp = MediaPlayer.create(this, R.raw.toggle);
+        if (mp != null) {
+            mp.setOnCompletionListener(MediaPlayer::release);
+            mp.start();
         }
     }
 }

@@ -6,6 +6,11 @@ import android.media.MediaPlayer; // ✅ ADDED
 import android.os.Bundle;
 import com.example.guessingnumber_fp.R;
 import android.app.AlertDialog;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
+import android.content.res.ColorStateList;
+import androidx.core.content.ContextCompat;
+import com.google.android.material.button.MaterialButton;
 
 public class MainActivity extends BaseActivity {
     private boolean isQuitting = false;
@@ -27,40 +32,50 @@ public class MainActivity extends BaseActivity {
 
         isInGameFlow = false;
 
-        findViewById(R.id.btnPlay).setOnClickListener(v -> {
-            playButtonClickSound(); // ✅
+        // Use #444444 (darker grey) for color change
+        int darkGrey = 0xFF444444;
+        setupAnimatedButton(R.id.btnPlay, 0xFFFF6B4A, darkGrey, () -> {
+            playButtonClickSound();
             isNavigatingWithinApp = true;
             isInGameFlow = true;
             startActivity(new Intent(this, SelectDifficultyActivity.class));
         });
-
-        findViewById(R.id.btnHighscores).setOnClickListener(v -> {
-            playButtonClickSound(); // ✅
+        setupAnimatedButton(R.id.btnHighscores, 0xFFFF6B4A, darkGrey, () -> {
+            playButtonClickSound();
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, HighscoresActivity.class));
         });
-
-        findViewById(R.id.btnStats).setOnClickListener(v -> {
-            playButtonClickSound(); // ✅
+        setupAnimatedButton(R.id.btnStats, 0xFFFF6B4A, darkGrey, () -> {
+            playButtonClickSound();
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, StatsActivity.class));
         });
-
-        findViewById(R.id.btnSettings).setOnClickListener(v -> {
-            playButtonClickSound(); // ✅
+        setupAnimatedButton(R.id.btnSettings, 0xFFFF6B4A, darkGrey, () -> {
+            playButtonClickSound();
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, SettingsActivity.class));
         });
-
-        findViewById(R.id.btnHelp).setOnClickListener(v -> {
+        setupAnimatedButton(R.id.btnHelp, 0xFFFF6B4A, darkGrey, () -> {
             playButtonClickSound();
             isNavigatingWithinApp = true;
             startActivity(new Intent(this, HelpActivity.class));
         });
+        // For Quit button: animate from white to dark grey and back
+        setupAnimatedButton(R.id.btnQuit, 0xFFFFFFFF, darkGrey, () -> {
+            showQuitDialog();
+        });
+    }
 
-        findViewById(R.id.btnQuit).setOnClickListener(v -> {
-            // ❌ DO NOT PLAY BUTTON SOUND HERE
-            showQuitDialog(); // handled separately
+    private void setupAnimatedButton(int buttonId, int colorFrom, int colorTo, Runnable onClickAction) {
+        MaterialButton button = findViewById(buttonId);
+        button.setOnClickListener(v -> {
+            ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo, colorFrom);
+            colorAnimation.setDuration(350);
+            colorAnimation.addUpdateListener(animator -> {
+                button.setBackgroundTintList(ColorStateList.valueOf((int) animator.getAnimatedValue()));
+            });
+            colorAnimation.start();
+            onClickAction.run();
         });
     }
 

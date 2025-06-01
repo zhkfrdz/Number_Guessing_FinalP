@@ -44,78 +44,84 @@
             android:orientation="vertical"
             android:gravity="center_vertical">
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnPlay"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Play"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="#FF6B4A"
+                app:backgroundTint="#FF6B4A"
+                app:rippleColor="#383838"
                 android:textColor="#fff"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
                 android:fontFamily="@font/poppins_medium"
                 style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHighscores"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Highscores"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#FF6B4A"
+                app:backgroundTint="#FF6B4A"
+                app:rippleColor="#383838"
                 android:textColor="#fff"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
                 android:fontFamily="@font/poppins_medium"
                 style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnStats"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Stats"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#FF6B4A"
+                app:backgroundTint="#FF6B4A"
+                app:rippleColor="#383838"
                 android:textColor="#fff"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
                 android:fontFamily="@font/poppins_medium"
                 style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnSettings"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Settings"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#FF6B4A"
+                app:backgroundTint="#FF6B4A"
+                app:rippleColor="#383838"
                 android:textColor="#fff"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
                 android:fontFamily="@font/poppins_medium"
                 style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHelp"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Help"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#FF6B4A"
+                app:backgroundTint="#FF6B4A"
+                app:rippleColor="#383838"
                 android:textColor="#fff"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
                 android:fontFamily="@font/poppins_medium"
                 style="@style/Widget.MaterialComponents.Button"/>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnQuit"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
                 android:text="Quit"
                 android:layout_marginTop="16dp"
-                android:backgroundTint="#FFFFFF"
+                app:backgroundTint="#FFFFFF"
+                app:rippleColor="#383838"
                 android:textColor="#FF6B4A"
                 android:textSize="22sp"
                 app:cornerRadius="32dp"
