@@ -55,7 +55,8 @@
             android:padding="24dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="@drawable/ripple_orange"
+            app:rippleColor="#FF6B4A">
 
 
             <LinearLayout
@@ -107,7 +108,8 @@
             android:padding="24dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="@drawable/ripple_orange"
+            app:rippleColor="#FF6B4A">
 
 
             <LinearLayout
@@ -159,7 +161,8 @@
             android:padding="24dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="@drawable/ripple_orange"
+            app:rippleColor="#FF6B4A">
 
 
             <LinearLayout
@@ -211,7 +214,8 @@
             android:padding="24dp"
             android:clickable="true"
             android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:foreground="@drawable/ripple_orange"
+            app:rippleColor="#FF6B4A">
 
 
             <LinearLayout

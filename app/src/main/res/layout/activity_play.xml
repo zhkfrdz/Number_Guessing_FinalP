@@ -135,7 +135,8 @@
             android:textSize="20sp"
             app:layout_constraintTop_toBottomOf="@id/tvHint"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:foreground="@drawable/ripple_white" />
 
         <LinearLayout
             android:id="@+id/buttonsContainer"
@@ -158,35 +159,47 @@
                 android:text="Guess"
                 android:textColor="#fff"
                 android:textSize="20sp"
-                app:cornerRadius="30dp" />
+                app:cornerRadius="30dp"
+                android:foreground="@drawable/ripple_grey"
+                android:clickable="true"
+                android:focusable="true"
+                app:rippleColor="#383838" />
 
             <Button
                 android:id="@+id/btnHintButton"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
-                android:layout_marginStart="16dp"
                 android:layout_weight="1"
                 android:backgroundTint="#FF6B4A"
                 android:fontFamily="@font/poppins_medium"
                 android:text="Hint"
                 android:textColor="#fff"
                 android:textSize="20sp"
-                app:cornerRadius="30dp" />
+                app:cornerRadius="30dp"
+                android:layout_marginStart="12dp"
+                android:foreground="@drawable/ripple_grey"
+                android:clickable="true"
+                android:focusable="true"
+                app:rippleColor="#383838" />
         </LinearLayout>
 
         <Button
             android:id="@+id/btnGiveUp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="match_parent"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
             android:layout_height="60dp"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#FFFFFF"
+            android:layout_weight="1"
+            android:backgroundTint="#FF6B4A"
             android:fontFamily="@font/poppins_medium"
-            android:text="Give Up"
-            android:textColor="#FF6B4A"
+            android:text="Back to Menu"
+            android:textColor="#fff"
             android:textSize="20sp"
             app:cornerRadius="30dp"
+            android:foreground="@drawable/ripple_grey"
+            android:clickable="true"
+            android:focusable="true"
+            app:rippleColor="#383838"
             app:layout_constraintTop_toBottomOf="@id/buttonsContainer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
