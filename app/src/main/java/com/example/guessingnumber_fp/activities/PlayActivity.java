@@ -43,7 +43,7 @@ public class PlayActivity extends BaseActivity {
     ImageButton btnHintInfo;
     EditText etGuess;
     ImageView heart1, heart2, heart3, heart4, heart5, heart6;
-    Button btnGuess, btnGiveUp, btnHint;
+    Button btnGuess, btnGiveUp, btnHint, btnHelpPlay;
     ImageButton btnTryAgain;
     Handler handler = new Handler();
 
@@ -1151,7 +1151,6 @@ public class PlayActivity extends BaseActivity {
             messageContent = "• Start with 15 hints\n• Earn +1 hint for every correct guess (50% chance)";
             iconResource = R.drawable.impossible;
         }
-        
         // Add small difficulty icon
         if (iconResource != 0) {
             ImageView icon = new ImageView(this);

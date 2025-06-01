@@ -5,20 +5,29 @@ import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.text.method.PasswordTransformationMethod;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
 import com.example.guessingnumber_fp.database.DatabaseMigrationHelper;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class SettingsActivity extends BaseActivity {
     private Switch switchMusic, switchSound;
     private Button btnLogout, btnSaveChanges;
     private EditText etNewUsername, etCurrentPassword, etNewPassword;
+    private ImageView ivToggleCurrentPassword, ivToggleNewPassword;
+    private boolean isCurrentPasswordVisible = false, isNewPasswordVisible = false;
     private SharedPreferences prefs;
     private GameDataManager dataManager;
     // No need for MediaPlayer instances with global SoundManager
@@ -37,6 +46,8 @@ public class SettingsActivity extends BaseActivity {
         etNewUsername = findViewById(R.id.etNewUsername);
         etCurrentPassword = findViewById(R.id.etCurrentPassword);
         etNewPassword = findViewById(R.id.etNewPassword);
+        ivToggleCurrentPassword = findViewById(R.id.ivToggleCurrentPassword);
+        ivToggleNewPassword = findViewById(R.id.ivToggleNewPassword);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         dataManager = GameDataManager.getInstance(this);
 
@@ -87,6 +98,54 @@ public class SettingsActivity extends BaseActivity {
                 onBackPressed();
             });
         }
+
+        ivToggleCurrentPassword.setOnClickListener(v -> {
+            isCurrentPasswordVisible = !isCurrentPasswordVisible;
+            if (isCurrentPasswordVisible) {
+                etCurrentPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                ivToggleCurrentPassword.setImageResource(R.drawable.ic_eye_open);
+            } else {
+                etCurrentPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                ivToggleCurrentPassword.setImageResource(R.drawable.ic_eye_closed);
+            }
+            etCurrentPassword.setSelection(etCurrentPassword.getText().length());
+        });
+        ivToggleNewPassword.setOnClickListener(v -> {
+            isNewPasswordVisible = !isNewPasswordVisible;
+            if (isNewPasswordVisible) {
+                etNewPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                ivToggleNewPassword.setImageResource(R.drawable.ic_eye_open);
+            } else {
+                etNewPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                ivToggleNewPassword.setImageResource(R.drawable.ic_eye_closed);
+            }
+            etNewPassword.setSelection(etNewPassword.getText().length());
+        });
+        // Real-time validation
+        etNewUsername.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                String username = s.toString();
+                if (!username.isEmpty() && !username.matches("^[a-zA-Z0-9_]{4,16}$")) {
+                    etNewUsername.setError("4-16 chars, letters/numbers/underscores only");
+                } else {
+                    etNewUsername.setError(null);
+                }
+            }
+        });
+        etNewPassword.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                String password = s.toString();
+                if (!password.isEmpty() && password.length() < 6) {
+                    etNewPassword.setError("Password must be at least 6 characters");
+                } else {
+                    etNewPassword.setError(null);
+                }
+            }
+        });
     }
 
     private void playButtonClickSound() {
@@ -189,7 +248,10 @@ public class SettingsActivity extends BaseActivity {
         
         // If trying to change password
         if (!TextUtils.isEmpty(currentPassword) || !TextUtils.isEmpty(newPassword)) {
-            if (!savedPassword.equals(currentPassword)) {
+            String hashedCurrentPassword = sha256(currentPassword);
+            String hashedNewPassword = sha256(newPassword);
+            
+            if (!savedPassword.equals(hashedCurrentPassword)) {
                 Toast.makeText(this, "Current password is incorrect", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -199,18 +261,25 @@ public class SettingsActivity extends BaseActivity {
                 return;
             }
             
+            if (etNewPassword.getError() != null) {
+                Toast.makeText(this, "Please fix password error", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
             // Save new password
             if (!TextUtils.isEmpty(newUsername)) {
-                // If username is also changing, save password under new username
-                dataManager.putString("password_" + newUsername, newPassword);
+                dataManager.putString("password_" + newUsername, hashedNewPassword);
             } else {
-                // Otherwise update password for current username
-                dataManager.putString("password_" + currentUser, newPassword);
+                dataManager.putString("password_" + currentUser, hashedNewPassword);
             }
         }
         
         // If trying to change username
         if (!TextUtils.isEmpty(newUsername) && !newUsername.equals(currentUser)) {
+            if (etNewUsername.getError() != null) {
+                Toast.makeText(this, "Please fix username error", Toast.LENGTH_SHORT).show();
+                return;
+            }
             // Check if username already exists (except current user)
             boolean usernameExists = false;
             
@@ -255,5 +324,21 @@ public class SettingsActivity extends BaseActivity {
         etNewPassword.setText("");
         
         Toast.makeText(this, "Changes saved successfully", Toast.LENGTH_SHORT).show();
+    }
+
+    private String sha256(String base) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes());
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }
