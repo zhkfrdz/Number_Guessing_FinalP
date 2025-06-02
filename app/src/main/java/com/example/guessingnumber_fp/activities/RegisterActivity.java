@@ -50,10 +50,10 @@ public class RegisterActivity extends BaseActivity {
             isPasswordVisible = !isPasswordVisible;
             if (isPasswordVisible) {
                 etRegisterPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                ivTogglePasswordRegister.setImageResource(R.drawable.ic_eye_open);
+                ivTogglePasswordRegister.setImageResource(R.drawable.show);
             } else {
                 etRegisterPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                ivTogglePasswordRegister.setImageResource(R.drawable.ic_eye_closed);
+                ivTogglePasswordRegister.setImageResource(R.drawable.hide);
             }
             etRegisterPassword.setSelection(etRegisterPassword.getText().length());
         });

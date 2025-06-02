@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
@@ -19,6 +18,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import android.widget.ImageView;
 
 public class LoginActivity extends BaseActivity {
     private EditText etUsername, etPassword;
@@ -42,21 +42,9 @@ public class LoginActivity extends BaseActivity {
         btnGoToRegister = findViewById(R.id.btnGoToRegister);
         prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         dataManager = GameDataManager.getInstance(this);
+        ivTogglePasswordLogin = findViewById(R.id.ivTogglePasswordLogin);
 
         startMenuMusic();
-
-        ivTogglePasswordLogin = findViewById(R.id.ivTogglePasswordLogin);
-        ivTogglePasswordLogin.setOnClickListener(v -> {
-            isPasswordVisible = !isPasswordVisible;
-            if (isPasswordVisible) {
-                etPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-                ivTogglePasswordLogin.setImageResource(R.drawable.ic_eye_open);
-            } else {
-                etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                ivTogglePasswordLogin.setImageResource(R.drawable.ic_eye_closed);
-            }
-            etPassword.setSelection(etPassword.getText().length());
-        });
 
         // Real-time validation
         etUsername.addTextChangedListener(new TextWatcher() {
@@ -84,6 +72,18 @@ public class LoginActivity extends BaseActivity {
             }
         });
 
+        ivTogglePasswordLogin.setOnClickListener(v -> {
+            isPasswordVisible = !isPasswordVisible;
+            if (isPasswordVisible) {
+                etPassword.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                ivTogglePasswordLogin.setImageResource(R.drawable.show);
+            } else {
+                etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                ivTogglePasswordLogin.setImageResource(R.drawable.hide);
+            }
+            etPassword.setSelection(etPassword.getText().length());
+        });
+
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,10 +107,8 @@ public class LoginActivity extends BaseActivity {
                     
                     // Check if user exists
                     if (!userDAO.userExists(username)) {
-                        // Create new user if not exists
-                        userDAO.createUser(username);
-                        // Save password
-                        dataManager.putString("password_" + username, hashedPassword);
+                        Toast.makeText(LoginActivity.this, "User does not exist. Please register first.", Toast.LENGTH_SHORT).show();
+                        return;
                     } else {
                         // Verify password
                         String savedPassword = dataManager.getString("password_" + username, "");
@@ -121,8 +119,15 @@ public class LoginActivity extends BaseActivity {
                     }
                 } else {
                     // Legacy SharedPreferences approach
-                    // Save password for this user
-                    prefs.edit().putString("password_" + username, hashedPassword).apply();
+                    if (!prefs.contains("password_" + username)) {
+                        Toast.makeText(LoginActivity.this, "User does not exist. Please register first.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String savedPassword = prefs.getString("password_" + username, "");
+                    if (!hashedPassword.equals(savedPassword)) {
+                        Toast.makeText(LoginActivity.this, "Invalid password", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                 }
                 
                 // Save current user using GameDataManager
