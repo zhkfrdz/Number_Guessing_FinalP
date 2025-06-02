@@ -67,8 +67,8 @@
         android:layout_height="24dp"
         android:layout_gravity="end"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="-40dp"
-        android:src="@drawable/ic_eye_closed"
+        android:layout_marginTop="-37dp"
+        android:src="@drawable/hide"
         android:contentDescription="Show/Hide Password"/>
 
     <Button
@@ -76,7 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:text="Login"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="30dp"
         android:backgroundTint="#FF6B4A"
         android:textColor="#fff"
         android:textSize="20sp"
