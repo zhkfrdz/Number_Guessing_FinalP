@@ -6,17 +6,27 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <ImageView
-        android:src="@drawable/icon"
+    <FrameLayout
         android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:contentDescription="App Logo"/>
+        android:layout_height="300dp"
+        android:layout_gravity="center"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp">
+
+        <ImageView
+            android:id="@+id/splash_logo"
+            android:src="@drawable/icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:contentDescription="App Logo"/>
+    </FrameLayout>
 
     <TextView
+        android:id="@+id/app_name"
         android:text="Guess the 9"
         android:textSize="24sp"
         android:textColor="@color/white"
-        android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
         android:fontFamily="@font/audiowide"
         android:layout_height="wrap_content"/>
