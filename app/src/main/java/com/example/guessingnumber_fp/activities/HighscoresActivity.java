@@ -182,7 +182,8 @@ public class HighscoresActivity extends BaseActivity {
         ((TextView) findViewById(textViewId)).setText(sb.toString());
     }
 
-    private void playBackButtonSound() {
+    @Override
+    protected void playBackButtonSound() {
         boolean soundOn = prefs.getBoolean("sound_on", true);
         if (soundOn && backButtonPlayer != null) {
             backButtonPlayer.start();

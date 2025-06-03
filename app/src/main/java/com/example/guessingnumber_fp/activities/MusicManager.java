@@ -58,9 +58,26 @@ public class MusicManager {
             if (mediaPlayer != null) {
                 currentResId = resId;
                 mediaPlayer.setLooping(shouldLoop);
-                mediaPlayer.start();
-                isPaused = false;
-                Log.d(TAG, "Started playing music: " + resId);
+                
+                // Add a small preparation delay to ensure consistent playback
+                try {
+                    mediaPlayer.setOnPreparedListener(mp -> {
+                        try {
+                            mp.start();
+                            isPaused = false;
+                            Log.d(TAG, "Started playing music after preparation: " + resId);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error starting music after preparation: " + e.getMessage());
+                        }
+                    });
+                    
+                    // Fallback in case the prepared listener doesn't trigger
+                    mediaPlayer.start();
+                    isPaused = false;
+                    Log.d(TAG, "Started playing music: " + resId);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error starting music: " + e.getMessage());
+                }
             } else {
                 Log.e(TAG, "Failed to create MediaPlayer for resId: " + resId);
                 currentResId = -1;

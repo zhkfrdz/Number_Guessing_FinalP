@@ -22,6 +22,11 @@ public class PlayActivity extends BaseActivity {
     Random random = new Random();
     private boolean isNavigatingWithinApp = false;
     private boolean isInGameFlow = false;
+    private boolean isHintOnCooldown = false;
+    private int hintCooldownSeconds = 5;
+    private int previousGuess = 0; // Track the user's previous guess for comparison hints
+    private String originalHintText = "HINT";
+    private Runnable hintCooldownRunnable;
 
     // Mocking messages arrays
     private final String[] tooLowMessages = {
@@ -86,12 +91,12 @@ public class PlayActivity extends BaseActivity {
                 maxHearts = 4;
             } else if ("hard".equals(difficulty)) {
                 difficultyMax = 50;
-                hints = 10;
+                hints = 5;
                 hearts = 5;
                 maxHearts = 5;
             } else if ("impossible".equals(difficulty)) {
                 difficultyMax = 100;
-                hints = 15;
+                hints = 5;
                 hearts = 6;
                 maxHearts = 6;
             }
@@ -219,18 +224,36 @@ public class PlayActivity extends BaseActivity {
         });
 
         btnHint.setOnClickListener(v -> {
-            // Play hint_st sound once
-            if (isSoundOn()) {
-                MediaPlayer hintPlayer = MediaPlayer.create(this, R.raw.hint_st);
-                if (hintPlayer != null) {
-                    hintPlayer.setLooping(false);
-                    hintPlayer.setOnCompletionListener(mp -> {
-                        mp.release();
-                    });
-                    hintPlayer.start();
+            // Check if hint button is on cooldown
+            if (!isHintOnCooldown) {
+                // Save original hint text if not saved yet
+                if (originalHintText.equals("HINT") && btnHint.getText() != null) {
+                    originalHintText = btnHint.getText().toString();
                 }
+                
+                // Play hint_st sound once
+                if (isSoundOn()) {
+                    MediaPlayer hintPlayer = MediaPlayer.create(this, R.raw.hint_st);
+                    if (hintPlayer != null) {
+                        hintPlayer.setLooping(false);
+                        hintPlayer.setOnCompletionListener(mp -> {
+                            mp.release();
+                        });
+                        hintPlayer.start();
+                    }
+                }
+                useHint();
+                
+                // Set cooldown
+                isHintOnCooldown = true;
+                btnHint.setAlpha(0.5f); // Visual feedback that button is disabled
+                
+                // Start countdown display
+                startHintCooldownTimer();
+            } else {
+                // Optional: Show a message that hint is on cooldown
+                Toast.makeText(PlayActivity.this, "Hint on cooldown!", Toast.LENGTH_SHORT).show();
             }
-            useHint();
         });
         
         btnTryAgain.setOnClickListener(v -> {
@@ -312,6 +335,7 @@ public class PlayActivity extends BaseActivity {
         
         correctGuessCounter = 0;
         hasGuessedThisRound = false;
+        previousGuess = 0; // Reset previous guess for new game
         updateHearts();
         // Set default hints based on difficulty
         if ("easy".equals(difficulty)) {
@@ -319,9 +343,9 @@ public class PlayActivity extends BaseActivity {
         } else if ("medium".equals(difficulty)) {
             hints = 5;
         } else if ("hard".equals(difficulty)) {
-            hints = 10;
+            hints = 5;
         } else if ("impossible".equals(difficulty)) {
-            hints = 15;
+            hints = 5;
         }
 
         if (tvHint != null) tvHint.setText("HINTS: " + hints);
@@ -373,6 +397,25 @@ public class PlayActivity extends BaseActivity {
         Log.d("PlayActivity", "New target number: " + targetNumber);
     }
 
+    /**
+     * Returns a random roast message when the player uses too many hints
+     */
+    private String getRoastMessage() {
+        String[] roasts = {
+            "Try counting on your fingers!",
+            "Math isn't your thing, huh?",
+            "Guessing with eyes closed?",
+            "Need more help?",
+            "Try easier mode next time!",
+            "Calculator needed!",
+            "Guessing champion...",
+            "Interesting strategy...",
+            "Random number generator!",
+            "My grandma guesses better!"
+        };
+        return roasts[random.nextInt(roasts.length)];
+    }
+
     private void useHint() {
         if (hints > 0) {
             if (hasGuessedThisRound) {
@@ -382,104 +425,42 @@ public class PlayActivity extends BaseActivity {
                 prefs.edit().putInt("hints_used_" + difficulty + "_" + currentUser, prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0) + 1).apply();
                 tvHint.setText("HINTS: " + hints);
 
-                // Get a random hint type based on a wider variety of options
-                String hintMessage;
-                int hintType = random.nextInt(7); // 0-6 for 7 different hint types
+                // Determine when to show the roast based on difficulty
+                int roastThreshold = ("hard".equals(difficulty) || "impossible".equals(difficulty)) ? 5 : 3;
                 
-                switch (hintType) {
-                    case 0:
-                        // Range hint - narrow range
-                        int rangeSize = difficultyMax / 4;
-                        int lowerBound = Math.max(1, targetNumber - rangeSize/2);
-                        int upperBound = Math.min(difficultyMax, targetNumber + rangeSize/2);
-                        hintMessage = "The number is between " + lowerBound + " and " + upperBound;
-                        break;
-                        
-                    case 1:
-                        // Even/Odd hint
-                        if (targetNumber % 2 == 0) {
-                            hintMessage = "The number is even";
-                        } else {
-                            hintMessage = "The number is odd";
-                        }
-                        break;
-                        
-                    case 2:
-                        // Divisibility hint
-                        int[] divisors = {3, 5, 7};
-                        int divisor = divisors[random.nextInt(divisors.length)];
-                        if (targetNumber % divisor == 0) {
-                            hintMessage = "The number is divisible by " + divisor;
-                        } else {
-                            hintMessage = "The number is NOT divisible by " + divisor;
-                        }
-                        break;
-                        
-                    case 3:
-                        // Sum of digits hint
-                        int sum = 0;
-                        int temp = targetNumber;
-                        while (temp > 0) {
-                            sum += temp % 10;
-                            temp /= 10;
-                        }
-                        hintMessage = "The sum of the digits is " + sum;
-                        break;
-                        
-                    case 4:
-                        // Greater than half of max hint
-                        if (targetNumber > difficultyMax / 2) {
-                            hintMessage = "The number is greater than " + (difficultyMax / 2);
-                        } else {
-                            hintMessage = "The number is less than or equal to " + (difficultyMax / 2);
-                        }
-                        break;
-                        
-                    case 5:
-                        // Number of digits hint
-                        int digitCount = String.valueOf(targetNumber).length();
-                        hintMessage = "The number has " + digitCount + " digit" + (digitCount > 1 ? "s" : "");
-                        break;
-                        
-                    case 6:
-                        // First or last digit hint (for numbers with 2+ digits)
-                        if (targetNumber >= 10) {
-                            if (random.nextBoolean()) {
-                                // First digit
-                                int firstDigit = Integer.parseInt(String.valueOf(targetNumber).substring(0, 1));
-                                hintMessage = "The first digit is " + firstDigit;
-                            } else {
-                                // Last digit
-                                int lastDigit = targetNumber % 10;
-                                hintMessage = "The last digit is " + lastDigit;
-                            }
-                        } else {
-                            // For single-digit numbers
-                            if (targetNumber <= 5) {
-                                hintMessage = "The number is between 1 and 5";
-                            } else {
-                                hintMessage = "The number is between 6 and 10";
-                            }
-                        }
-                        break;
-                        
-                    default:
-                        // Fallback hint
-                        if (targetNumber % 2 == 0) {
-                            hintMessage = "The number is even";
-                        } else {
-                            hintMessage = "The number is odd";
-                        }
+                // Check if we've reached the threshold for roasting
+                if (hintsUsed == roastThreshold) {
+                    // Play sound effect for the roast - using hint sound since it's a hint-related feature
+                    MediaPlayer roastSound = MediaPlayer.create(this, R.raw.hint_st);
+                    roastSound.start();
+                    
+                    // Roast the player and reveal the answer
+                    String roastMessage = getRoastMessage() + "\nThe answer is " + targetNumber + "!";
+                    tvHintMessage.setText(roastMessage);
+                    tvHintMessage.setVisibility(View.VISIBLE);
+                    
+                    // Hide the message after 5 seconds to be consistent with other hints
+                    handler.postDelayed(() -> {
+                        tvHintMessage.setVisibility(View.GONE);
+                        // Optionally start a new round after revealing the answer
+                        // startNewRound();
+                    }, 5000);
+                    
+                    return; // Skip normal hint processing
                 }
-
+                
+                // Normal hint processing (before reaching the roast threshold)
+                // Use the HintManager to generate an appropriate hint based on difficulty
+                String hintMessage = HintManagerNew.generateHint(targetNumber, difficultyMax, difficulty);
+                
                 // Show hint message in custom TextView
                 tvHintMessage.setText(hintMessage);
                 tvHintMessage.setVisibility(View.VISIBLE);
 
-                // Hide the message after 4 seconds (increased from 3 to give more time to read)
+                // Hide the message after 5 seconds to give more time to read
                 handler.postDelayed(() -> {
                     tvHintMessage.setVisibility(View.GONE);
-                }, 4000);
+                }, 5000);
             } else {
                 tvHintMessage.setText("Make a guess first!");
                 tvHintMessage.setVisibility(View.VISIBLE);
@@ -531,6 +512,9 @@ public class PlayActivity extends BaseActivity {
                 Toast.makeText(this, "Please enter a number between 1 and " + difficultyMax, Toast.LENGTH_SHORT).show();
                 return;
             }
+            
+            // Store the current guess as previousGuess for future hint comparisons
+            previousGuess = guess;
 
             String currentUser = prefs.getString("current_user", "guest");
 
@@ -575,7 +559,7 @@ public class PlayActivity extends BaseActivity {
 
     private void handleCorrectGuess(String currentUser) {
         score++;
-        hearts = 3;
+        hearts = maxHearts;
         updateHearts();
         correctGuessCounter++;
 
@@ -599,8 +583,8 @@ public class PlayActivity extends BaseActivity {
                 Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
             }
         } else if ("impossible".equals(difficulty) && correctGuessCounter >= 1) {
-            // 50% chance to get a hint in impossible mode
-            if (random.nextBoolean()) {
+            // 25% chance to get a hint in impossible mode
+            if (random.nextInt(4) == 0) { // 1 in 4 chance (25%)
                 hints++;
                 if (isSoundOn()) {
                     Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
@@ -809,7 +793,7 @@ public class PlayActivity extends BaseActivity {
                 isInGameFlow = false;
                 Intent intent = new Intent(this, SelectDifficultyActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
+                startActivityWithTransition(intent);
                 finish();
             });
             dialog.show();
@@ -837,7 +821,7 @@ public class PlayActivity extends BaseActivity {
             isInGameFlow = false;
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            startActivityWithTransition(intent);
             finish();
             return;
         }
@@ -1002,7 +986,7 @@ public class PlayActivity extends BaseActivity {
                     isInGameFlow = false;
                     Intent intent = new Intent(this, SelectDifficultyActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
+                    startActivityWithTransition(intent);
                     finish();
                 });
                 
@@ -1081,10 +1065,9 @@ public class PlayActivity extends BaseActivity {
                 return R.raw.hard_bg_music; // Using hard_bg_music.mp3 for impossible difficulty
             default:
                 return R.raw.ez_bg_music;
-        }
+        } // Added the missing closing brace here
     }
-
-
+    
     private void startLevelMusic() {
         // Only start music if it's enabled in settings
         if (!dataManager.isMusicEnabled()) {
@@ -1097,18 +1080,84 @@ public class PlayActivity extends BaseActivity {
         // Get music resource based on difficulty
         int musicRes = getMusicResForDifficulty();
         
-        // Set looping and start music
+        // Set looping and start music with a small delay to ensure it starts properly
         MusicManager.setLooping(true);
-        MusicManager.start(this, musicRes);
-    }
-
-    @Override
-    public void onBackPressed() {
-        isNavigatingWithinApp = true;
-        isInGameFlow = true;
-        super.onBackPressed();
+        
+        // Use a handler to add a small delay before starting music
+        // This helps when navigating quickly between difficulty levels
+        new Handler().postDelayed(() -> {
+            if (isInGameFlow) { // Only start if we're still in the game flow
+                MusicManager.start(this, musicRes);
+            }
+        }, 100); // 100ms delay is enough to ensure proper initialization
     }
     
+    @Override
+    public void onBackPressed() {
+        // If the user has already guessed, show the confirmation dialog
+        // This makes the back button behave the same as the "Back to Menu" button
+        if (hasGuessedThisRound) {
+            // Play the quit sound effect before showing the give up dialog
+            if (isSoundOn()) {
+                MediaPlayer quitSound = MediaPlayer.create(this, R.raw.quit_st);
+                if (quitSound != null) {
+                    quitSound.setLooping(false);
+                    quitSound.setOnCompletionListener(mp -> mp.release());
+                    quitSound.start();
+                }
+            }
+            giveUp();
+        } else {
+            // If no guess has been made, use the standard back button behavior
+            // which will play the back button sound via BaseActivity
+            isNavigatingWithinApp = true;
+            isInGameFlow = false;
+            super.onBackPressed(); // This calls BaseActivity.onBackPressed() which plays the sound
+            
+            // Override the transition with the special circular reveal transition for PlayActivity
+            overridePendingTransition(R.anim.circle_reveal_in, R.anim.circle_reveal_out);
+        }
+    }
+    
+    /**
+     * Starts a countdown timer for the hint button cooldown
+     */
+    private void startHintCooldownTimer() {
+        // Cancel any existing cooldown runnable
+        if (hintCooldownRunnable != null) {
+            handler.removeCallbacks(hintCooldownRunnable);
+        }
+        
+        // Set initial countdown value
+        final int[] secondsLeft = {hintCooldownSeconds};
+        
+        // Update button text to show countdown
+        btnHint.setText(secondsLeft[0] + "");
+        
+        // Create a new runnable for the countdown
+        hintCooldownRunnable = new Runnable() {
+            @Override
+            public void run() {
+                secondsLeft[0]--;
+                
+                if (secondsLeft[0] > 0) {
+                    // Update button text with remaining seconds
+                    btnHint.setText(secondsLeft[0] + "");
+                    // Schedule next update in 1 second
+                    handler.postDelayed(this, 1000);
+                } else {
+                    // Cooldown complete, restore button
+                    isHintOnCooldown = false;
+                    btnHint.setAlpha(1.0f);
+                    btnHint.setText(originalHintText);
+                }
+            }
+        };
+        
+        // Start the countdown
+        handler.postDelayed(hintCooldownRunnable, 1000);
+    }
+
     private void showHintInfoDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         
@@ -1144,11 +1193,11 @@ public class PlayActivity extends BaseActivity {
             iconResource = R.drawable.medium;
         } else if ("hard".equals(difficulty)) {
             messageTitle = "HARD MODE";
-            messageContent = "• Start with 10 hints\n• Earn +1 hint for every 2 correct guesses";
+            messageContent = "• Start with 5 hints\n• Earn +1 hint for every 2 correct guesses";
             iconResource = R.drawable.hard;
         } else if ("impossible".equals(difficulty)) {
             messageTitle = "IMPOSSIBLE MODE";
-            messageContent = "• Start with 15 hints\n• Earn +1 hint for every correct guess (50% chance)";
+            messageContent = "• Start with 5 hints\n• Earn +1 hint for every correct guess (25% chance)";
             iconResource = R.drawable.impossible;
         }
         // Add small difficulty icon

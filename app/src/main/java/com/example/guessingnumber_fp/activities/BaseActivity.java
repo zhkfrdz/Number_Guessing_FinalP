@@ -1,8 +1,10 @@
 package com.example.guessingnumber_fp.activities;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
@@ -23,8 +25,43 @@ public class BaseActivity extends AppCompatActivity {
         }
         getWindow().setStatusBarColor(0xFF000000);
         
+        // Enable immersive fullscreen mode to hide system UI including navigation bar
+        enableImmersiveMode();
+        
         // Initialize database manager
         dataManager = GameDataManager.getInstance(this);
+    }
+
+    /**
+     * Enables immersive fullscreen mode to hide system UI elements including navigation bar
+     * This helps minimize distractions and accidental back button presses
+     */
+    protected void enableImmersiveMode() {
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
+        
+        // Set a listener to re-enable immersive mode if it gets disabled
+        decorView.setOnSystemUiVisibilityChangeListener(visibility -> {
+            if ((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
+                // The system bars are visible, re-hide them
+                decorView.setSystemUiVisibility(uiOptions);
+            }
+        });
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) {
+            // Re-enable immersive mode when the window gets focus
+            enableImmersiveMode();
+        }
     }
 
     protected void startMenuMusic() {
@@ -107,4 +144,60 @@ public class BaseActivity extends AppCompatActivity {
             MusicManager.release();
         }
     }
-} 
+    
+    /**
+     * Start an activity with a zoom transition animation
+     * @param intent The intent to start the activity
+     */
+    protected void startActivityWithTransition(Intent intent) {
+        isNavigatingWithinApp = true;
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+    
+    /**
+     * Start the PlayActivity with a special circle reveal transition animation
+     * @param intent The intent to start the PlayActivity
+     */
+    protected void startPlayActivityWithTransition(Intent intent) {
+        isNavigatingWithinApp = true;
+        isInGameFlow = true;
+        startActivity(intent);
+        overridePendingTransition(R.anim.circle_reveal_in, R.anim.circle_reveal_out);
+    }
+    
+    @Override
+    public void onBackPressed() {
+        // Play the back button sound effect before navigating back
+        // This ensures all activities have sound when back button is pressed
+        playBackButtonSound();
+        
+        // Set navigation flags
+        isNavigatingWithinApp = true;
+        
+        // Call the default back button behavior
+        super.onBackPressed();
+        
+        // Apply exit transition animation with zoom effect
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
+    
+    /**
+     * Plays the back button sound effect if sound is enabled
+     */
+    protected void playBackButtonSound() {
+        // Check if sound is enabled in settings
+        if (dataManager != null && dataManager.isSoundEnabled()) {
+            try {
+                android.media.MediaPlayer backButtonSound = android.media.MediaPlayer.create(this, R.raw.cat_back_btn);
+                if (backButtonSound != null) {
+                    backButtonSound.setLooping(false);
+                    backButtonSound.setOnCompletionListener(mp -> mp.release());
+                    backButtonSound.start();
+                }
+            } catch (Exception e) {
+                Log.e("Sound", "Error playing back button sound", e);
+            }
+        }
+    }
+}
