@@ -9,11 +9,14 @@ import android.text.method.PasswordTransformationMethod;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.guessingnumber_fp.R;
@@ -148,6 +151,42 @@ public class SettingsActivity extends BaseActivity {
                 }
             }
         });
+
+        // Sequential fade-in animation for all elements
+        final long fadeDuration = 180;
+        final long fadeDelay = 60;
+        // Find all views in order
+        TextView tvTitle = null;
+        for (int i = 0; i < ((android.view.ViewGroup) findViewById(android.R.id.content)).getChildCount(); i++) {
+            View v = ((android.view.ViewGroup) findViewById(android.R.id.content)).getChildAt(i);
+            if (v instanceof android.widget.TextView && ((TextView) v).getText().toString().equals("Settings")) {
+                tvTitle = (TextView) v;
+                break;
+            }
+        }
+        if (tvTitle == null) {
+            // fallback: find by traversing the layout
+            ViewGroup root = (ViewGroup) findViewById(android.R.id.content);
+            tvTitle = findTextViewWithText(root, "Settings");
+        }
+        View musicRow = ((ViewGroup) switchMusic.getParent());
+        View soundRow = ((ViewGroup) switchSound.getParent());
+        TextView tvChangeUsername = findTextViewWithText((ViewGroup) findViewById(android.R.id.content), "Change Username");
+        TextView tvChangePassword = findTextViewWithText((ViewGroup) findViewById(android.R.id.content), "Change Password");
+        // Prepare all views for fade-in
+        View[] fadeViews = new View[] {
+            tvTitle, btnBackSettings, musicRow, soundRow, tvChangeUsername, etNewUsername, tvChangePassword, etCurrentPassword, ivToggleCurrentPassword, etNewPassword, ivToggleNewPassword, btnSaveChanges, btnLogout
+        };
+        for (View v : fadeViews) {
+            if (v != null) v.setAlpha(0f);
+        }
+        // Animate sequentially
+        for (int i = 0; i < fadeViews.length; i++) {
+            final View v = fadeViews[i];
+            if (v != null) {
+                v.postDelayed(() -> v.animate().alpha(1f).setDuration(fadeDuration).start(), i * fadeDelay);
+            }
+        }
     }
 
     private void playButtonClickSound() {
@@ -350,5 +389,19 @@ public class SettingsActivity extends BaseActivity {
             mp.setOnCompletionListener(MediaPlayer::release);
             mp.start();
         }
+    }
+
+    // Helper method to find TextView by text
+    private TextView findTextViewWithText(ViewGroup root, String text) {
+        for (int i = 0; i < root.getChildCount(); i++) {
+            View v = root.getChildAt(i);
+            if (v instanceof TextView && text.equals(((TextView) v).getText().toString())) {
+                return (TextView) v;
+            } else if (v instanceof ViewGroup) {
+                TextView result = findTextViewWithText((ViewGroup) v, text);
+                if (result != null) return result;
+            }
+        }
+        return null;
     }
 }

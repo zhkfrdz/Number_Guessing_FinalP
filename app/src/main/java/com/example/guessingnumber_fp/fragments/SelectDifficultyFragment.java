@@ -37,10 +37,38 @@ public class SelectDifficultyFragment extends Fragment {
         View cardHard = view.findViewById(R.id.cardHard);
         View cardImpossible = view.findViewById(R.id.cardImpossible);
 
-        cardEasy.setOnClickListener(v -> startGame("easy", 10));
-        cardMedium.setOnClickListener(v -> startGame("medium", 30));
-        cardHard.setOnClickListener(v -> startGame("hard", 50));
-        cardImpossible.setOnClickListener(v -> startGame("impossible", 100));
+        cardEasy.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
+            startGame("easy", 10);
+        });
+        cardMedium.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
+            startGame("medium", 30);
+        });
+        cardHard.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
+            startGame("hard", 50);
+        });
+        cardImpossible.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
+            startGame("impossible", 100);
+        });
 
         return view;
     }

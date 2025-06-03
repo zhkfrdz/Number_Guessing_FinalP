@@ -22,6 +22,11 @@ public class PlayActivity extends BaseActivity {
     Random random = new Random();
     private boolean isNavigatingWithinApp = false;
     private boolean isInGameFlow = false;
+    private boolean isHintOnCooldown = false;
+    private int hintCooldownSeconds = 5;
+    private int previousGuess = 0; // Track the user's previous guess for comparison hints
+    private String originalHintText = "HINT";
+    private Runnable hintCooldownRunnable;
 
     // Mocking messages arrays
     private final String[] tooLowMessages = {
@@ -86,16 +91,16 @@ public class PlayActivity extends BaseActivity {
                 maxHearts = 4;
             } else if ("hard".equals(difficulty)) {
                 difficultyMax = 50;
-                hints = 10;
+                hints = 5;
                 hearts = 5;
                 maxHearts = 5;
             } else if ("impossible".equals(difficulty)) {
                 difficultyMax = 100;
-                hints = 15;
+                hints = 5;
                 hearts = 6;
                 maxHearts = 6;
             }
-            
+
             // Show the appropriate number of hearts based on difficulty
             if (heart4 != null) heart4.setVisibility(maxHearts >= 4 ? View.VISIBLE : View.GONE);
             if (heart5 != null) heart5.setVisibility(maxHearts >= 5 ? View.VISIBLE : View.GONE);
@@ -105,7 +110,7 @@ public class PlayActivity extends BaseActivity {
             if (tvLevel != null) tvLevel.setText(levelText);
             originalRangeMessage = "We are thinking of a number between 1 and " + difficultyMax;
             if (tvRange != null) tvRange.setText(originalRangeMessage);
-            
+
             // Set the appropriate difficulty image
             ImageView imgCats = findViewById(R.id.imgCats);
             if (imgCats != null) {
@@ -156,7 +161,7 @@ public class PlayActivity extends BaseActivity {
             btnHint = findViewById(R.id.btnHintButton);
             btnTryAgain = findViewById(R.id.btnTryAgain);
             btnHintInfo = findViewById(R.id.btnHintInfo);
-            
+
             // Essential components that must not be null
             if (etGuess == null || btnGuess == null) {
                 throw new IllegalStateException("Essential game components are missing");
@@ -184,7 +189,7 @@ public class PlayActivity extends BaseActivity {
             }
             checkGuess();
         });
-        
+
         btnGiveUp.setOnClickListener(v -> {
             if ("Back to Menu".equals(btnGiveUp.getText().toString())) {
                 // Play back button sound
@@ -199,11 +204,6 @@ public class PlayActivity extends BaseActivity {
                 // If button says "Back to Menu", just go back to the difficulty selection screen
                 isNavigatingWithinApp = true;
                 isInGameFlow = false;
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("show_select_difficulty", true);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             } else {
                 // Play give up button sound
@@ -221,20 +221,38 @@ public class PlayActivity extends BaseActivity {
         });
 
         btnHint.setOnClickListener(v -> {
-            // Play hint_st sound once
-            if (isSoundOn()) {
-                MediaPlayer hintPlayer = MediaPlayer.create(this, R.raw.hint_st);
-                if (hintPlayer != null) {
-                    hintPlayer.setLooping(false);
-                    hintPlayer.setOnCompletionListener(mp -> {
-                        mp.release();
-                    });
-                    hintPlayer.start();
+            // Check if hint button is on cooldown
+            if (!isHintOnCooldown) {
+                // Save original hint text if not saved yet
+                if (originalHintText.equals("HINT") && btnHint.getText() != null) {
+                    originalHintText = btnHint.getText().toString();
                 }
+
+                // Play hint_st sound once
+                if (isSoundOn()) {
+                    MediaPlayer hintPlayer = MediaPlayer.create(this, R.raw.hint_st);
+                    if (hintPlayer != null) {
+                        hintPlayer.setLooping(false);
+                        hintPlayer.setOnCompletionListener(mp -> {
+                            mp.release();
+                        });
+                        hintPlayer.start();
+                    }
+                }
+                useHint();
+
+                // Set cooldown
+                isHintOnCooldown = true;
+                btnHint.setAlpha(0.5f); // Visual feedback that button is disabled
+
+                // Start countdown display
+                startHintCooldownTimer();
+            } else {
+                // Optional: Show a message that hint is on cooldown
+                Toast.makeText(PlayActivity.this, "Hint on cooldown!", Toast.LENGTH_SHORT).show();
             }
-            useHint();
         });
-        
+
         btnTryAgain.setOnClickListener(v -> {
             // Re-enable all game components
             if (btnGuess != null) {
@@ -297,7 +315,7 @@ public class PlayActivity extends BaseActivity {
     private void startNewGame() {
         // Generate a new target number
         targetNumber = random.nextInt(difficultyMax) + 1;
-        
+
         // Reset game state
         // Set hearts based on difficulty
         if ("easy".equals(difficulty)) {
@@ -311,9 +329,10 @@ public class PlayActivity extends BaseActivity {
         } else {
             hearts = 3; // Default
         }
-        
+
         correctGuessCounter = 0;
         hasGuessedThisRound = false;
+        previousGuess = 0; // Reset previous guess for new game
         updateHearts();
         // Set default hints based on difficulty
         if ("easy".equals(difficulty)) {
@@ -321,9 +340,9 @@ public class PlayActivity extends BaseActivity {
         } else if ("medium".equals(difficulty)) {
             hints = 5;
         } else if ("hard".equals(difficulty)) {
-            hints = 10;
+            hints = 5;
         } else if ("impossible".equals(difficulty)) {
-            hints = 15;
+            hints = 5;
         }
 
         if (tvHint != null) tvHint.setText("HINTS: " + hints);
@@ -352,7 +371,7 @@ public class PlayActivity extends BaseActivity {
             tvRange.setText(originalRangeMessage);
             tvRange.setAlpha(1f);
         }
-        
+
         // Reset buttons
         if (btnGuess != null) {
             btnGuess.setEnabled(true);
@@ -375,6 +394,25 @@ public class PlayActivity extends BaseActivity {
         Log.d("PlayActivity", "New target number: " + targetNumber);
     }
 
+    /**
+     * Returns a random roast message when the player uses too many hints
+     */
+    private String getRoastMessage() {
+        String[] roasts = {
+                "Try counting on your fingers!",
+                "Math isn't your thing, huh?",
+                "Guessing with eyes closed?",
+                "Need more help?",
+                "Try easier mode next time!",
+                "Calculator needed!",
+                "Guessing champion...",
+                "Interesting strategy...",
+                "Random number generator!",
+                "My grandma guesses better!"
+        };
+        return roasts[random.nextInt(roasts.length)];
+    }
+
     private void useHint() {
         if (hints > 0) {
             if (hasGuessedThisRound) {
@@ -384,104 +422,42 @@ public class PlayActivity extends BaseActivity {
                 prefs.edit().putInt("hints_used_" + difficulty + "_" + currentUser, prefs.getInt("hints_used_" + difficulty + "_" + currentUser, 0) + 1).apply();
                 tvHint.setText("HINTS: " + hints);
 
-                // Get a random hint type based on a wider variety of options
-                String hintMessage;
-                int hintType = random.nextInt(7); // 0-6 for 7 different hint types
-                
-                switch (hintType) {
-                    case 0:
-                        // Range hint - narrow range
-                        int rangeSize = difficultyMax / 4;
-                        int lowerBound = Math.max(1, targetNumber - rangeSize/2);
-                        int upperBound = Math.min(difficultyMax, targetNumber + rangeSize/2);
-                        hintMessage = "The number is between " + lowerBound + " and " + upperBound;
-                        break;
-                        
-                    case 1:
-                        // Even/Odd hint
-                        if (targetNumber % 2 == 0) {
-                            hintMessage = "The number is even";
-                        } else {
-                            hintMessage = "The number is odd";
-                        }
-                        break;
-                        
-                    case 2:
-                        // Divisibility hint
-                        int[] divisors = {3, 5, 7};
-                        int divisor = divisors[random.nextInt(divisors.length)];
-                        if (targetNumber % divisor == 0) {
-                            hintMessage = "The number is divisible by " + divisor;
-                        } else {
-                            hintMessage = "The number is NOT divisible by " + divisor;
-                        }
-                        break;
-                        
-                    case 3:
-                        // Sum of digits hint
-                        int sum = 0;
-                        int temp = targetNumber;
-                        while (temp > 0) {
-                            sum += temp % 10;
-                            temp /= 10;
-                        }
-                        hintMessage = "The sum of the digits is " + sum;
-                        break;
-                        
-                    case 4:
-                        // Greater than half of max hint
-                        if (targetNumber > difficultyMax / 2) {
-                            hintMessage = "The number is greater than " + (difficultyMax / 2);
-                        } else {
-                            hintMessage = "The number is less than or equal to " + (difficultyMax / 2);
-                        }
-                        break;
-                        
-                    case 5:
-                        // Number of digits hint
-                        int digitCount = String.valueOf(targetNumber).length();
-                        hintMessage = "The number has " + digitCount + " digit" + (digitCount > 1 ? "s" : "");
-                        break;
-                        
-                    case 6:
-                        // First or last digit hint (for numbers with 2+ digits)
-                        if (targetNumber >= 10) {
-                            if (random.nextBoolean()) {
-                                // First digit
-                                int firstDigit = Integer.parseInt(String.valueOf(targetNumber).substring(0, 1));
-                                hintMessage = "The first digit is " + firstDigit;
-                            } else {
-                                // Last digit
-                                int lastDigit = targetNumber % 10;
-                                hintMessage = "The last digit is " + lastDigit;
-                            }
-                        } else {
-                            // For single-digit numbers
-                            if (targetNumber <= 5) {
-                                hintMessage = "The number is between 1 and 5";
-                            } else {
-                                hintMessage = "The number is between 6 and 10";
-                            }
-                        }
-                        break;
-                        
-                    default:
-                        // Fallback hint
-                        if (targetNumber % 2 == 0) {
-                            hintMessage = "The number is even";
-                        } else {
-                            hintMessage = "The number is odd";
-                        }
+                // Determine when to show the roast based on difficulty
+                int roastThreshold = ("hard".equals(difficulty) || "impossible".equals(difficulty)) ? 5 : 3;
+
+                // Check if we've reached the threshold for roasting
+                if (hintsUsed == roastThreshold) {
+                    // Play sound effect for the roast - using hint sound since it's a hint-related feature
+                    MediaPlayer roastSound = MediaPlayer.create(this, R.raw.hint_st);
+                    roastSound.start();
+
+                    // Roast the player and reveal the answer
+                    String roastMessage = getRoastMessage() + "\nThe answer is " + targetNumber + "!";
+                    tvHintMessage.setText(roastMessage);
+                    tvHintMessage.setVisibility(View.VISIBLE);
+
+                    // Hide the message after 5 seconds to be consistent with other hints
+                    handler.postDelayed(() -> {
+                        tvHintMessage.setVisibility(View.GONE);
+                        // Optionally start a new round after revealing the answer
+                        // startNewRound();
+                    }, 5000);
+
+                    return; // Skip normal hint processing
                 }
+
+                // Normal hint processing (before reaching the roast threshold)
+                // Use the HintManager to generate an appropriate hint based on difficulty
+                String hintMessage = HintManagerNew.generateHint(targetNumber, difficultyMax, difficulty);
 
                 // Show hint message in custom TextView
                 tvHintMessage.setText(hintMessage);
                 tvHintMessage.setVisibility(View.VISIBLE);
 
-                // Hide the message after 4 seconds (increased from 3 to give more time to read)
+                // Hide the message after 5 seconds to give more time to read
                 handler.postDelayed(() -> {
                     tvHintMessage.setVisibility(View.GONE);
-                }, 4000);
+                }, 5000);
             } else {
                 tvHintMessage.setText("Make a guess first!");
                 tvHintMessage.setVisibility(View.VISIBLE);
@@ -534,13 +510,16 @@ public class PlayActivity extends BaseActivity {
                 return;
             }
 
+            // Store the current guess as previousGuess for future hint comparisons
+            previousGuess = guess;
+
             String currentUser = prefs.getString("current_user", "guest");
 
             if (!hasGuessedThisRound) {
                 prefs.edit().putInt("games_played_" + difficulty + "_" + currentUser,
                         prefs.getInt("games_played_" + difficulty + "_" + currentUser, 0) + 1).apply();
                 hasGuessedThisRound = true;
-                
+
                 // Change the button text from "Back to Menu" to "Give Up" after first guess
                 if (btnGiveUp != null && "Back to Menu".equals(btnGiveUp.getText().toString())) {
                     btnGiveUp.setText("Give Up");
@@ -557,7 +536,7 @@ public class PlayActivity extends BaseActivity {
                         correctPlayer.start();
                     }
                 }
-                
+
                 // Show success message
                 Toast.makeText(this, "Correct! Moving to next number!", Toast.LENGTH_SHORT).show();
                 handleCorrectGuess(currentUser);
@@ -577,7 +556,7 @@ public class PlayActivity extends BaseActivity {
 
     private void handleCorrectGuess(String currentUser) {
         score++;
-        hearts = 3;
+        hearts = maxHearts;
         updateHearts();
         correctGuessCounter++;
 
@@ -601,8 +580,8 @@ public class PlayActivity extends BaseActivity {
                 Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
             }
         } else if ("impossible".equals(difficulty) && correctGuessCounter >= 1) {
-            // 50% chance to get a hint in impossible mode
-            if (random.nextBoolean()) {
+            // 25% chance to get a hint in impossible mode
+            if (random.nextInt(4) == 0) { // 1 in 4 chance (25%)
                 hints++;
                 if (isSoundOn()) {
                     Toast.makeText(this, "You earned a hint!", Toast.LENGTH_SHORT).show();
@@ -676,14 +655,14 @@ public class PlayActivity extends BaseActivity {
             }
             // Create a custom dialog with polished UI
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            
+
             // Create a custom view for the dialog
             LinearLayout dialogLayout = new LinearLayout(this);
             dialogLayout.setOrientation(LinearLayout.VERTICAL);
             dialogLayout.setPadding(48, 35, 48, 48);
             dialogLayout.setGravity(Gravity.CENTER);
             dialogLayout.setBackgroundResource(R.drawable.dialog_gradient_bg);
-            
+
             // Game over image
             ImageView image = new ImageView(this);
             image.setImageResource(R.drawable.gameo);
@@ -693,7 +672,7 @@ public class PlayActivity extends BaseActivity {
             image.setLayoutParams(imgParams);
             image.setScaleType(ImageView.ScaleType.FIT_CENTER);
             dialogLayout.addView(image);
-            
+
             // Title with styling
             TextView title = new TextView(this);
             title.setText("NO LIVES LEFT");
@@ -703,7 +682,7 @@ public class PlayActivity extends BaseActivity {
             title.setTextColor(0xFFFF6B4A);
             title.setPadding(0, 0, 0, 16);
             dialogLayout.addView(title);
-            
+
             // Number reveal
             TextView numberReveal = new TextView(this);
             numberReveal.setText("The number was: " + targetNumber);
@@ -713,12 +692,12 @@ public class PlayActivity extends BaseActivity {
             numberReveal.setTextColor(0xFFFFFFFF);
             numberReveal.setPadding(0, 0, 0, 32);
             dialogLayout.addView(numberReveal);
-            
+
             // Button container
             LinearLayout buttonLayout = new LinearLayout(this);
             buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
             buttonLayout.setGravity(Gravity.CENTER);
-            
+
             // Retry button
             Button retryBtn = new Button(this);
             retryBtn.setText("RETRY");
@@ -728,7 +707,7 @@ public class PlayActivity extends BaseActivity {
             retryParams.setMargins(8, 0, 8, 0);
             retryBtn.setLayoutParams(retryParams);
             buttonLayout.addView(retryBtn);
-            
+
             // Back to Menu button
             Button backBtn = new Button(this);
             backBtn.setText("BACK TO MENU");
@@ -738,13 +717,13 @@ public class PlayActivity extends BaseActivity {
             backParams.setMargins(8, 0, 8, 0);
             backBtn.setLayoutParams(backParams);
             buttonLayout.addView(backBtn);
-            
+
             dialogLayout.addView(buttonLayout);
-            
+
             builder.setView(dialogLayout);
             builder.setCancelable(false);
             AlertDialog dialog = builder.create();
-            
+
             // Set transparent background for rounded corners
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
@@ -757,7 +736,7 @@ public class PlayActivity extends BaseActivity {
                     noLivesPlayer[0].release();
                     noLivesPlayer[0] = null;
                 }
-                
+
                 // Play button sound for Retry
                 if (isSoundOn()) {
                     MediaPlayer buttonPlayer = MediaPlayer.create(this, R.raw.cat_buttons);
@@ -767,7 +746,7 @@ public class PlayActivity extends BaseActivity {
                         buttonPlayer.start();
                     }
                 }
-                
+
                 dialog.dismiss();
                 // Re-enable all game components and start a new game
                 if (btnGuess != null) {
@@ -795,7 +774,7 @@ public class PlayActivity extends BaseActivity {
                     noLivesPlayer[0].release();
                     noLivesPlayer[0] = null;
                 }
-                
+
                 // Play back button sound
                 if (isSoundOn()) {
                     MediaPlayer backButtonPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
@@ -805,15 +784,8 @@ public class PlayActivity extends BaseActivity {
                         backButtonPlayer.start();
                     }
                 }
-                
+
                 dialog.dismiss();
-                isNavigatingWithinApp = true;
-                isInGameFlow = false;
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("show_select_difficulty", true);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             });
             dialog.show();
@@ -839,216 +811,196 @@ public class PlayActivity extends BaseActivity {
         if (hearts <= 0) {
             isNavigatingWithinApp = true;
             isInGameFlow = false;
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.putExtra("show_select_difficulty", true);
-            startActivity(intent);
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
-            return;
-        }
+        } else {
+            // Create a custom confirmation dialog
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
 
-        // Create a custom confirmation dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        
-        // Create a custom view for the confirmation dialog
-        LinearLayout confirmLayout = new LinearLayout(this);
-        confirmLayout.setOrientation(LinearLayout.VERTICAL);
-        confirmLayout.setPadding(48, 35, 48, 48);
-        confirmLayout.setGravity(Gravity.CENTER);
-        confirmLayout.setBackgroundResource(R.drawable.dialog_gradient_bg);
-        
-        // Title with styling
-        TextView confirmTitle = new TextView(this);
-        confirmTitle.setText("GIVE UP?");
-        confirmTitle.setTextSize(24);
-        confirmTitle.setGravity(Gravity.CENTER);
-        confirmTitle.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.audiowide));
-        confirmTitle.setTextColor(0xFFFF6B4A);
-        confirmTitle.setPadding(0, 0, 0, 24);
-        confirmLayout.addView(confirmTitle);
-        
-        // Message
-        TextView confirmMessage = new TextView(this);
-        confirmMessage.setText(hasGuessedThisRound ?
-                "Are you sure you want to give up?\nThis will count as a loss." :
-                "Are you sure you want to give up?\nThis will not affect your stats.");
-        confirmMessage.setTextSize(16);
-        confirmMessage.setGravity(Gravity.CENTER);
-        confirmMessage.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
-        confirmMessage.setTextColor(0xFFFFFFFF);
-        confirmMessage.setLineSpacing(8, 1);
-        confirmMessage.setPadding(0, 0, 0, 32);
-        confirmLayout.addView(confirmMessage);
-        
-        // Button container
-        LinearLayout buttonContainer = new LinearLayout(this);
-        buttonContainer.setOrientation(LinearLayout.HORIZONTAL);
-        buttonContainer.setGravity(Gravity.CENTER);
-        
-        // Yes button
-        Button yesButton = new Button(this);
-        yesButton.setText("YES");
-        yesButton.setTextColor(0xFFFFFFFF);
-        yesButton.setBackgroundResource(R.drawable.rounded_red_button);
-        LinearLayout.LayoutParams yesParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        yesParams.setMargins(8, 0, 8, 0);
-        yesButton.setLayoutParams(yesParams);
-        
-        // No button
-        Button noButton = new Button(this);
-        noButton.setText("NO");
-        noButton.setTextColor(0xFFFFFFFF);
-        noButton.setBackgroundResource(R.drawable.rounded_red_button);
-        LinearLayout.LayoutParams noParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        noParams.setMargins(8, 0, 8, 0);
-        noButton.setLayoutParams(noParams);
-        
-        buttonContainer.addView(yesButton);
-        buttonContainer.addView(noButton);
-        confirmLayout.addView(buttonContainer);
-        
-        builder.setView(confirmLayout);
-        AlertDialog confirmDialog = builder.create();
-        
-        // Set transparent background for rounded corners
-        if (confirmDialog.getWindow() != null) {
-            confirmDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        }
-        
-        // Button click handlers
-        yesButton.setOnClickListener(v -> {
-            // Play give up sound for Yes
-            if (isSoundOn()) {
-                MediaPlayer giveUpPlayer = MediaPlayer.create(this, R.raw.giveup);
-                if (giveUpPlayer != null) {
-                    giveUpPlayer.setLooping(false);
-                    giveUpPlayer.setOnCompletionListener(mp -> mp.release());
-                    giveUpPlayer.start();
-                }
+            // Create a custom view for the confirmation dialog
+            LinearLayout confirmLayout = new LinearLayout(this);
+            confirmLayout.setOrientation(LinearLayout.VERTICAL);
+            confirmLayout.setPadding(48, 35, 48, 48);
+            confirmLayout.setGravity(Gravity.CENTER);
+            confirmLayout.setBackgroundResource(R.drawable.dialog_gradient_bg);
+
+            // Title with styling
+            TextView confirmTitle = new TextView(this);
+            confirmTitle.setText("GIVE UP?");
+            confirmTitle.setTextSize(24);
+            confirmTitle.setGravity(Gravity.CENTER);
+            confirmTitle.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.audiowide));
+            confirmTitle.setTextColor(0xFFFF6B4A);
+            confirmTitle.setPadding(0, 0, 0, 24);
+            confirmLayout.addView(confirmTitle);
+
+            // Message
+            TextView confirmMessage = new TextView(this);
+            confirmMessage.setText(hasGuessedThisRound ?
+                    "Are you sure you want to give up?\nThis will count as a loss." :
+                    "Are you sure you want to give up?\nThis will not affect your stats.");
+            confirmMessage.setTextSize(16);
+            confirmMessage.setGravity(Gravity.CENTER);
+            confirmMessage.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
+            confirmMessage.setTextColor(0xFFFFFFFF);
+            confirmMessage.setLineSpacing(8, 1);
+            confirmMessage.setPadding(0, 0, 0, 32);
+            confirmLayout.addView(confirmMessage);
+
+            // Button container
+            LinearLayout buttonContainer = new LinearLayout(this);
+            buttonContainer.setOrientation(LinearLayout.HORIZONTAL);
+            buttonContainer.setGravity(Gravity.CENTER);
+
+            // Yes button
+            Button yesButton = new Button(this);
+            yesButton.setText("YES");
+            yesButton.setTextColor(0xFFFFFFFF);
+            yesButton.setBackgroundResource(R.drawable.rounded_red_button);
+            LinearLayout.LayoutParams yesParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+            yesParams.setMargins(8, 0, 8, 0);
+            yesButton.setLayoutParams(yesParams);
+
+            // No button
+            Button noButton = new Button(this);
+            noButton.setText("NO");
+            noButton.setTextColor(0xFFFFFFFF);
+            noButton.setBackgroundResource(R.drawable.rounded_red_button);
+            LinearLayout.LayoutParams noParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+            noParams.setMargins(8, 0, 8, 0);
+            noButton.setLayoutParams(noParams);
+
+            buttonContainer.addView(yesButton);
+            buttonContainer.addView(noButton);
+            confirmLayout.addView(buttonContainer);
+
+            builder.setView(confirmLayout);
+            AlertDialog confirmDialog = builder.create();
+
+            // Set transparent background for rounded corners
+            if (confirmDialog.getWindow() != null) {
+                confirmDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
             }
-            
-            confirmDialog.dismiss();
-            
-            if (hasGuessedThisRound) {
-                String currentUser = prefs.getString("current_user", "guest");
-                int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
-                prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
-                
-                // Show game over dialog with the gameo.png image
-                AlertDialog.Builder resultBuilder = new AlertDialog.Builder(this);
-                LinearLayout layout = new LinearLayout(this);
-                layout.setOrientation(LinearLayout.VERTICAL);
-                layout.setPadding(48, 35, 48, 48);
-                layout.setGravity(Gravity.CENTER);
-                layout.setBackgroundResource(R.drawable.dialog_gradient_bg);
-                
-                // Game over image
-                ImageView gameOverImage = new ImageView(this);
-                gameOverImage.setImageResource(R.drawable.gameover);
-                LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 300);
-                imgParams.gravity = Gravity.CENTER;
-                imgParams.setMargins(0, 0, 0, 24);
-                gameOverImage.setLayoutParams(imgParams);
-                gameOverImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                layout.addView(gameOverImage);
-                
-                // Title
-                TextView title = new TextView(this);
-                title.setText("FORFEITED");
-                title.setTextSize(24);
-                title.setGravity(Gravity.CENTER);
-                title.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.audiowide));
-                title.setTextColor(0xFFFF6B4A);
-                title.setPadding(0, 0, 0, 16);
-                layout.addView(title);
-                
-                // Number reveal
-                TextView numberReveal = new TextView(this);
-                numberReveal.setText("The number was: " + targetNumber);
-                numberReveal.setTextSize(18);
-                numberReveal.setGravity(Gravity.CENTER);
-                numberReveal.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
-                numberReveal.setTextColor(0xFFFFFFFF);
-                numberReveal.setPadding(0, 0, 0, 32);
-                layout.addView(numberReveal);
-                
-                // Back to menu button
-                Button backButton = new Button(this);
-                backButton.setText("BACK TO MENU");
-                backButton.setTextColor(0xFFFFFFFF);
-                backButton.setBackgroundResource(R.drawable.rounded_red_button);
-                LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, 
-                        LinearLayout.LayoutParams.WRAP_CONTENT);
-                backButton.setLayoutParams(backParams);
-                layout.addView(backButton);
-                
-                resultBuilder.setView(layout);
-                AlertDialog resultDialog = resultBuilder.create();
-                
-                // Set transparent background for rounded corners
-                if (resultDialog.getWindow() != null) {
-                    resultDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                }
-                
-                backButton.setOnClickListener(btn -> {
-                    // Play back button sound
-                    if (isSoundOn()) {
-                        MediaPlayer backButtonPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
-                        if (backButtonPlayer != null) {
-                            backButtonPlayer.setLooping(false);
-                            backButtonPlayer.setOnCompletionListener(mp -> mp.release());
-                            backButtonPlayer.start();
-                        }
+
+            // Button click handlers
+            yesButton.setOnClickListener(v -> {
+                // Play give up sound for Yes
+                if (isSoundOn()) {
+                    MediaPlayer giveUpPlayer = MediaPlayer.create(this, R.raw.giveup);
+                    if (giveUpPlayer != null) {
+                        giveUpPlayer.setLooping(false);
+                        giveUpPlayer.setOnCompletionListener(mp -> mp.release());
+                        giveUpPlayer.start();
                     }
-                    
-                    resultDialog.dismiss();
-                    isNavigatingWithinApp = true;
-                    isInGameFlow = false;
-                    Intent intent = new Intent(this, MainActivity.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    intent.putExtra("show_select_difficulty", true);
-                    startActivity(intent);
-                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                    finish();
-                });
-                
-                resultDialog.show();
-            } else {
-                isNavigatingWithinApp = true;
-                isInGameFlow = false;
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("show_select_difficulty", true);
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
-            }
-        });
-        
-        noButton.setOnClickListener(v -> {
-            // Play back button sound for No
-            if (isSoundOn()) {
-                MediaPlayer backButtonPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
-                if (backButtonPlayer != null) {
-                    backButtonPlayer.setLooping(false);
-                    backButtonPlayer.setOnCompletionListener(mp -> mp.release());
-                    backButtonPlayer.start();
                 }
-            }
-            
-            confirmDialog.dismiss();
-        });
-        
-        confirmDialog.show();
+
+                confirmDialog.dismiss();
+
+                if (hasGuessedThisRound) {
+                    String currentUser = prefs.getString("current_user", "guest");
+                    int lost = prefs.getInt("games_lost_" + difficulty + "_" + currentUser, 0) + 1;
+                    prefs.edit().putInt("games_lost_" + difficulty + "_" + currentUser, lost).apply();
+
+                    // Show game over dialog with the gameo.png image
+                    AlertDialog.Builder resultBuilder = new AlertDialog.Builder(this);
+                    LinearLayout layout = new LinearLayout(this);
+                    layout.setOrientation(LinearLayout.VERTICAL);
+                    layout.setPadding(48, 35, 48, 48);
+                    layout.setGravity(Gravity.CENTER);
+                    layout.setBackgroundResource(R.drawable.dialog_gradient_bg);
+
+                    // Game over image
+                    ImageView gameOverImage = new ImageView(this);
+                    gameOverImage.setImageResource(R.drawable.gameover);
+                    LinearLayout.LayoutParams imgParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 300);
+                    imgParams.gravity = Gravity.CENTER;
+                    imgParams.setMargins(0, 0, 0, 24);
+                    gameOverImage.setLayoutParams(imgParams);
+                    gameOverImage.setScaleType(ImageView.ScaleType.FIT_CENTER);
+                    layout.addView(gameOverImage);
+
+                    // Title
+                    TextView title = new TextView(this);
+                    title.setText("FORFEITED");
+                    title.setTextSize(24);
+                    title.setGravity(Gravity.CENTER);
+                    title.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.audiowide));
+                    title.setTextColor(0xFFFF6B4A);
+                    title.setPadding(0, 0, 0, 16);
+                    layout.addView(title);
+
+                    // Number reveal
+                    TextView numberReveal = new TextView(this);
+                    numberReveal.setText("The number was: " + targetNumber);
+                    numberReveal.setTextSize(18);
+                    numberReveal.setGravity(Gravity.CENTER);
+                    numberReveal.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(this, R.font.poppins_medium));
+                    numberReveal.setTextColor(0xFFFFFFFF);
+                    numberReveal.setPadding(0, 0, 0, 32);
+                    layout.addView(numberReveal);
+
+                    // Back to menu button
+                    Button backButton = new Button(this);
+                    backButton.setText("BACK TO MENU");
+                    backButton.setTextColor(0xFFFFFFFF);
+                    backButton.setBackgroundResource(R.drawable.rounded_red_button);
+                    LinearLayout.LayoutParams backParams = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+                    backButton.setLayoutParams(backParams);
+                    layout.addView(backButton);
+
+                    resultBuilder.setView(layout);
+                    AlertDialog resultDialog = resultBuilder.create();
+
+                    // Set transparent background for rounded corners
+                    if (resultDialog.getWindow() != null) {
+                        resultDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    }
+
+                    backButton.setOnClickListener(btn -> {
+                        // Play back button sound
+                        if (isSoundOn()) {
+                            MediaPlayer backButtonPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
+                            if (backButtonPlayer != null) {
+                                backButtonPlayer.setLooping(false);
+                                backButtonPlayer.setOnCompletionListener(mp -> mp.release());
+                                backButtonPlayer.start();
+                            }
+                        }
+
+                        resultDialog.dismiss();
+                        finish();
+                    });
+
+                    resultDialog.show();
+                } else {
+                    finish();
+                }
+            });
+
+            noButton.setOnClickListener(v -> {
+                // Play back button sound for No
+                if (isSoundOn()) {
+                    MediaPlayer backButtonPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
+                    if (backButtonPlayer != null) {
+                        backButtonPlayer.setLooping(false);
+                        backButtonPlayer.setOnCompletionListener(mp -> mp.release());
+                        backButtonPlayer.start();
+                    }
+                }
+
+                confirmDialog.dismiss();
+            });
+
+            confirmDialog.show();
+        }
     }
 
     private void updateHearts() {
         heart1.setImageResource(hearts >= 1 ? R.drawable.heart : R.drawable.empty_heart);
         heart2.setImageResource(hearts >= 2 ? R.drawable.heart : R.drawable.empty_heart);
         heart3.setImageResource(hearts >= 3 ? R.drawable.heart : R.drawable.empty_heart);
-        
+
         // Only update additional hearts if they're visible for this difficulty
         if (heart4 != null && heart4.getVisibility() == View.VISIBLE) {
             heart4.setImageResource(hearts >= 4 ? R.drawable.heart : R.drawable.empty_heart);
@@ -1060,14 +1012,15 @@ public class PlayActivity extends BaseActivity {
             heart6.setImageResource(hearts >= 6 ? R.drawable.heart : R.drawable.empty_heart);
         }
     }
-    
+
     @Override
     public void finish() {
         isNavigatingWithinApp = true;
         isInGameFlow = true;
         super.finish();
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
-    
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -1091,44 +1044,83 @@ public class PlayActivity extends BaseActivity {
                 return R.raw.hard_bg_music; // Using hard_bg_music.mp3 for impossible difficulty
             default:
                 return R.raw.ez_bg_music;
-        }
+        } // Added the missing closing brace here
     }
-
 
     private void startLevelMusic() {
         // Only start music if it's enabled in settings
         if (!dataManager.isMusicEnabled()) {
             return;
         }
-        
+
         // Set game flow flag to true
         isInGameFlow = true;
-        
+
         // Get music resource based on difficulty
         int musicRes = getMusicResForDifficulty();
-        
-        // Set looping and start music
+
+        // Set looping and start music with a small delay to ensure it starts properly
         MusicManager.setLooping(true);
-        MusicManager.start(this, musicRes);
+
+        // Use a handler to add a small delay before starting music
+        // This helps when navigating quickly between difficulty levels
+        new Handler().postDelayed(() -> {
+            if (isInGameFlow) { // Only start if we're still in the game flow
+                MusicManager.start(this, musicRes);
+            }
+        }, 100); // 100ms delay is enough to ensure proper initialization
     }
 
-    @Override
-    public void onBackPressed() {
-        isNavigatingWithinApp = true;
-        isInGameFlow = true;
-        super.onBackPressed();
+
+    /**
+     * Starts a countdown timer for the hint button cooldown
+     */
+    private void startHintCooldownTimer() {
+        // Cancel any existing cooldown runnable
+        if (hintCooldownRunnable != null) {
+            handler.removeCallbacks(hintCooldownRunnable);
+        }
+
+        // Set initial countdown value
+        final int[] secondsLeft = {hintCooldownSeconds};
+
+        // Update button text to show countdown
+        btnHint.setText(secondsLeft[0] + "");
+
+        // Create a new runnable for the countdown
+        hintCooldownRunnable = new Runnable() {
+            @Override
+            public void run() {
+                secondsLeft[0]--;
+
+                if (secondsLeft[0] > 0) {
+                    // Update button text with remaining seconds
+                    btnHint.setText(secondsLeft[0] + "");
+                    // Schedule next update in 1 second
+                    handler.postDelayed(this, 1000);
+                } else {
+                    // Cooldown complete, restore button
+                    isHintOnCooldown = false;
+                    btnHint.setAlpha(1.0f);
+                    btnHint.setText(originalHintText);
+                }
+            }
+        };
+
+        // Start the countdown
+        handler.postDelayed(hintCooldownRunnable, 1000);
     }
-    
+
     private void showHintInfoDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        
+
         // Create a custom view for the dialog
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(48, 35, 48, 48);
         layout.setGravity(Gravity.CENTER);
         layout.setBackgroundColor(0xFF000000);
-        
+
         // Title with styling
         TextView title = new TextView(this);
         title.setText("HINT SYSTEM");
@@ -1138,12 +1130,12 @@ public class PlayActivity extends BaseActivity {
         title.setTextColor(0xFFFF6B4A);
         title.setPadding(0, 0, 0, 24);
         layout.addView(title);
-        
+
         // Content based on difficulty
         String messageTitle = "";
         String messageContent = "";
         int iconResource = 0;
-        
+
         if ("easy".equals(difficulty)) {
             messageTitle = "EASY MODE";
             messageContent = "• Start with 3 hints\n• Earn +1 hint for every 3 correct guesses";
@@ -1154,11 +1146,11 @@ public class PlayActivity extends BaseActivity {
             iconResource = R.drawable.medium;
         } else if ("hard".equals(difficulty)) {
             messageTitle = "HARD MODE";
-            messageContent = "• Start with 10 hints\n• Earn +1 hint for every 2 correct guesses";
+            messageContent = "• Start with 5 hints\n• Earn +1 hint for every 2 correct guesses";
             iconResource = R.drawable.hard;
         } else if ("impossible".equals(difficulty)) {
             messageTitle = "IMPOSSIBLE MODE";
-            messageContent = "• Start with 15 hints\n• Earn +1 hint for every correct guess (50% chance)";
+            messageContent = "• Start with 5 hints\n• Earn +1 hint for every correct guess (25% chance)";
             iconResource = R.drawable.impossible;
         }
         // Add small difficulty icon
@@ -1171,7 +1163,7 @@ public class PlayActivity extends BaseActivity {
             icon.setLayoutParams(imgParams);
             layout.addView(icon);
         }
-        
+
         // Add difficulty title
         TextView difficultyTitle = new TextView(this);
         difficultyTitle.setText(messageTitle);
@@ -1181,7 +1173,7 @@ public class PlayActivity extends BaseActivity {
         difficultyTitle.setTextColor(0xFFFFFFFF);
         difficultyTitle.setPadding(0, 8, 0, 16);
         layout.addView(difficultyTitle);
-        
+
         // Add content
         TextView content = new TextView(this);
         content.setText(messageContent);
@@ -1192,10 +1184,10 @@ public class PlayActivity extends BaseActivity {
         content.setLineSpacing(8, 1);
         content.setPadding(16, 0, 0, 24);
         layout.addView(content);
-        
+
         // Set the custom view to the builder
         builder.setView(layout);
-        
+
         // Create and show the dialog
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {

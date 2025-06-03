@@ -1,6 +1,7 @@
 package com.example.guessingnumber_fp.fragments;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,20 +30,45 @@ public class MainMenuFragment extends Fragment {
         MaterialButton btnQuit = view.findViewById(R.id.btnQuit);
 
         btnPlay.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).showSelectDifficultyFragment();
             }
         });
         btnHighscores.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
             startActivity(new Intent(getActivity(), HighscoresActivity.class));
         });
         btnStats.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
             startActivity(new Intent(getActivity(), StatsActivity.class));
         });
         btnSettings.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
             startActivity(new Intent(getActivity(), SettingsActivity.class));
         });
         btnHelp.setOnClickListener(v -> {
+            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
+            if (player != null) {
+                player.setOnCompletionListener(MediaPlayer::release);
+                player.start();
+            }
             startActivity(new Intent(getActivity(), HelpActivity.class));
         });
         btnQuit.setOnClickListener(v -> {

@@ -30,7 +30,6 @@
             android:label="Guess the 9" />
         <activity android:name=".activities.LoginActivity" />
         <activity android:name=".activities.PlayActivity" />
-        <activity android:name=".activities.SelectDifficultyActivity" />
         <activity android:name=".activities.StatsActivity" />
         <activity android:name=".activities.HighscoresActivity" />
         <activity android:name=".activities.SettingsActivity" />
