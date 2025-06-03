@@ -11,6 +11,10 @@ import android.animation.ValueAnimator;
 import android.content.res.ColorStateList;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.button.MaterialButton;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import com.example.guessingnumber_fp.fragments.MainMenuFragment;
+import com.example.guessingnumber_fp.fragments.SelectDifficultyFragment;
 
 public class MainActivity extends BaseActivity {
     private boolean isQuitting = false;
@@ -19,6 +23,14 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, new MainMenuFragment())
+                .commit();
+        }
 
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         String currentUser = prefs.getString("current_user", null);
@@ -28,42 +40,7 @@ public class MainActivity extends BaseActivity {
             return;
         }
 
-        setContentView(R.layout.activity_main);
-
         isInGameFlow = false;
-
-        // Use #444444 (darker grey) for color change
-        int darkGrey = 0xFF444444;
-        setupAnimatedButton(R.id.btnPlay, 0xFFFF6B4A, darkGrey, () -> {
-            playButtonClickSound();
-            isNavigatingWithinApp = true;
-            isInGameFlow = true;
-            startActivity(new Intent(this, SelectDifficultyActivity.class));
-        });
-        setupAnimatedButton(R.id.btnHighscores, 0xFFFF6B4A, darkGrey, () -> {
-            playButtonClickSound();
-            isNavigatingWithinApp = true;
-            startActivity(new Intent(this, HighscoresActivity.class));
-        });
-        setupAnimatedButton(R.id.btnStats, 0xFFFF6B4A, darkGrey, () -> {
-            playButtonClickSound();
-            isNavigatingWithinApp = true;
-            startActivity(new Intent(this, StatsActivity.class));
-        });
-        setupAnimatedButton(R.id.btnSettings, 0xFFFF6B4A, darkGrey, () -> {
-            playButtonClickSound();
-            isNavigatingWithinApp = true;
-            startActivity(new Intent(this, SettingsActivity.class));
-        });
-        setupAnimatedButton(R.id.btnHelp, 0xFFFF6B4A, darkGrey, () -> {
-            playButtonClickSound();
-            isNavigatingWithinApp = true;
-            startActivity(new Intent(this, HelpActivity.class));
-        });
-        // For Quit button: animate from white to dark grey and back
-        setupAnimatedButton(R.id.btnQuit, 0xFFFFFFFF, darkGrey, () -> {
-            showQuitDialog();
-        });
     }
 
     private void setupAnimatedButton(int buttonId, int colorFrom, int colorTo, Runnable onClickAction) {
@@ -96,7 +73,7 @@ public class MainActivity extends BaseActivity {
         isNavigatingWithinApp = false;
     }
 
-    private void showQuitDialog() {
+    public void showQuitDialog() {
         // Play quit sound using global SoundManager
         SoundManager.playSound(this, R.raw.quit_st);
         isQuitting = true;
@@ -130,5 +107,21 @@ public class MainActivity extends BaseActivity {
         if (!isNavigatingWithinApp && !isQuitting) {
             MusicManager.pause();
         }
+    }
+
+    public void showSelectDifficultyFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.replace(R.id.fragment_container, new SelectDifficultyFragment());
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    public void showMainMenuFragment() {
+        getSupportFragmentManager()
+            .beginTransaction()
+            .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
+            .replace(R.id.fragment_container, new MainMenuFragment())
+            .commit();
     }
 }
