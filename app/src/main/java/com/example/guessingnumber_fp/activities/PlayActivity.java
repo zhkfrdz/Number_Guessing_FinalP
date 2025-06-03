@@ -793,7 +793,7 @@ public class PlayActivity extends BaseActivity {
                 isInGameFlow = false;
                 Intent intent = new Intent(this, SelectDifficultyActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivityWithTransition(intent);
+                startActivity(intent);
                 finish();
             });
             dialog.show();
@@ -821,7 +821,7 @@ public class PlayActivity extends BaseActivity {
             isInGameFlow = false;
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivityWithTransition(intent);
+            startActivity(intent);
             finish();
             return;
         }
@@ -986,7 +986,7 @@ public class PlayActivity extends BaseActivity {
                     isInGameFlow = false;
                     Intent intent = new Intent(this, SelectDifficultyActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivityWithTransition(intent);
+                    startActivity(intent);
                     finish();
                 });
                 
@@ -1113,14 +1113,12 @@ public class PlayActivity extends BaseActivity {
             isNavigatingWithinApp = true;
             isInGameFlow = false;
             super.onBackPressed(); // This calls BaseActivity.onBackPressed() which plays the sound
-            
-            // Override the transition with the special circular reveal transition for PlayActivity
-            overridePendingTransition(R.anim.circle_reveal_in, R.anim.circle_reveal_out);
         }
     }
     
     /**
      * Starts a countdown timer for the hint button cooldown
+     * Shows the remaining seconds on the button text
      */
     private void startHintCooldownTimer() {
         // Cancel any existing cooldown runnable

@@ -1,6 +1,5 @@
 package com.example.guessingnumber_fp.activities;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -145,27 +144,6 @@ public class BaseActivity extends AppCompatActivity {
         }
     }
     
-    /**
-     * Start an activity with a zoom transition animation
-     * @param intent The intent to start the activity
-     */
-    protected void startActivityWithTransition(Intent intent) {
-        isNavigatingWithinApp = true;
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-    }
-    
-    /**
-     * Start the PlayActivity with a special circle reveal transition animation
-     * @param intent The intent to start the PlayActivity
-     */
-    protected void startPlayActivityWithTransition(Intent intent) {
-        isNavigatingWithinApp = true;
-        isInGameFlow = true;
-        startActivity(intent);
-        overridePendingTransition(R.anim.circle_reveal_in, R.anim.circle_reveal_out);
-    }
-    
     @Override
     public void onBackPressed() {
         // Play the back button sound effect before navigating back
@@ -177,9 +155,6 @@ public class BaseActivity extends AppCompatActivity {
         
         // Call the default back button behavior
         super.onBackPressed();
-        
-        // Apply exit transition animation with zoom effect
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
     
     /**

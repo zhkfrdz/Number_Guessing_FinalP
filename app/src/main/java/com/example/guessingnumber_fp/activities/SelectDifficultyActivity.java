@@ -64,11 +64,10 @@ public class SelectDifficultyActivity extends BaseActivity {
 
     private void startGame(String difficulty, int max) {
         isNavigatingWithinApp = true;
-        isInGameFlow = true;
         Intent intent = new Intent(this, PlayActivity.class);
         intent.putExtra("difficulty", difficulty);
         intent.putExtra("max", max);
-        startPlayActivityWithTransition(intent);
+        startActivity(intent);
     }
 
     private void playButtonClickSound() {

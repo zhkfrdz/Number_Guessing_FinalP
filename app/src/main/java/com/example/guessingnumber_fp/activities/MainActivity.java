@@ -23,7 +23,7 @@ public class MainActivity extends BaseActivity {
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         String currentUser = prefs.getString("current_user", null);
         if (currentUser == null) {
-            startActivityWithTransition(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
@@ -38,27 +38,27 @@ public class MainActivity extends BaseActivity {
             playButtonClickSound();
             isNavigatingWithinApp = true;
             isInGameFlow = true;
-            startPlayActivityWithTransition(new Intent(this, SelectDifficultyActivity.class));
+            startActivity(new Intent(this, SelectDifficultyActivity.class));
         });
         setupAnimatedButton(R.id.btnHighscores, 0xFFFF6B4A, darkGrey, () -> {
             playButtonClickSound();
             isNavigatingWithinApp = true;
-            startActivityWithTransition(new Intent(this, HighscoresActivity.class));
+            startActivity(new Intent(this, HighscoresActivity.class));
         });
         setupAnimatedButton(R.id.btnStats, 0xFFFF6B4A, darkGrey, () -> {
             playButtonClickSound();
             isNavigatingWithinApp = true;
-            startActivityWithTransition(new Intent(this, StatsActivity.class));
+            startActivity(new Intent(this, StatsActivity.class));
         });
         setupAnimatedButton(R.id.btnSettings, 0xFFFF6B4A, darkGrey, () -> {
             playButtonClickSound();
             isNavigatingWithinApp = true;
-            startActivityWithTransition(new Intent(this, SettingsActivity.class));
+            startActivity(new Intent(this, SettingsActivity.class));
         });
         setupAnimatedButton(R.id.btnHelp, 0xFFFF6B4A, darkGrey, () -> {
             playButtonClickSound();
             isNavigatingWithinApp = true;
-            startActivityWithTransition(new Intent(this, HelpActivity.class));
+            startActivity(new Intent(this, HelpActivity.class));
         });
         // For Quit button: animate from white to dark grey and back
         setupAnimatedButton(R.id.btnQuit, 0xFFFFFFFF, darkGrey, () -> {
