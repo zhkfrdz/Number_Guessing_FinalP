@@ -23,6 +23,7 @@
             android:layout_marginTop="8dp"/>
 
         <TextView
+            android:id="@+id/tvGameStatsTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -33,6 +34,7 @@
             android:textSize="28sp" />
 
         <TextView
+            android:id="@+id/tvPerformanceSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your performance"

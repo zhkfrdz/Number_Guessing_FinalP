@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.activities.MainActivity;
+import androidx.core.app.ActivityOptionsCompat;
+import android.media.MediaPlayer;
 
 public class SelectDifficultyFragment extends Fragment {
     @Nullable
@@ -18,6 +20,13 @@ public class SelectDifficultyFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_select_difficulty, container, false);
         ImageButton btnBack = view.findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> {
+            if (getActivity() != null) {
+                MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_back_btn);
+                if (player != null) {
+                    player.setOnCompletionListener(MediaPlayer::release);
+                    player.start();
+                }
+            }
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).showMainMenuFragment();
             }
@@ -41,6 +50,7 @@ public class SelectDifficultyFragment extends Fragment {
         android.content.Intent intent = new android.content.Intent(getActivity(), com.example.guessingnumber_fp.activities.PlayActivity.class);
         intent.putExtra("difficulty", difficulty);
         intent.putExtra("max", max);
-        startActivity(intent);
+        ActivityOptionsCompat options = ActivityOptionsCompat.makeCustomAnimation(getActivity(), android.R.anim.fade_in, android.R.anim.fade_out);
+        startActivity(intent, options.toBundle());
     }
 } 

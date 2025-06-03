@@ -12,6 +12,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import androidx.cardview.widget.CardView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,6 +97,27 @@ public class HighscoresActivity extends BaseActivity {
             isNavigatingWithinApp = true;
             finish();
         });
+
+        // Animate all cards and headers in
+        int[] cardIds = new int[] {
+            R.id.tvHighScoresTitle, R.id.tvTopPlayersSubtitle, R.id.spinnerHighscoreDifficulty, R.id.tvHighscoreContent
+        };
+        for (int i = 0; i < cardIds.length; i++) {
+            View statView = findViewById(cardIds[i]);
+            if (statView != null) {
+                View card = statView;
+                if (cardIds[i] == R.id.tvHighscoreContent) {
+                    card = (View) statView.getParent().getParent(); // TextView -> LinearLayout -> CardView
+                }
+                card.setAlpha(0f);
+                final View finalCard = card;
+                card.postDelayed(() -> {
+                    Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+                    finalCard.setAlpha(1f);
+                    finalCard.startAnimation(slideIn);
+                }, i * 100);
+            }
+        }
     }
 
     private void updateDifficultyTitle() {
@@ -201,10 +225,23 @@ public class HighscoresActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        playBackButtonSound();
-        isNavigatingWithinApp = true;
-        isInGameFlow = false;
-        super.onBackPressed();
+        // Animate all cards and headers out
+        int[] viewIds = new int[] {
+            R.id.tvHighScoresTitle, R.id.tvTopPlayersSubtitle, R.id.spinnerHighscoreDifficulty, R.id.tvHighscoreContent
+        };
+        for (int id : viewIds) {
+            View statView = findViewById(id);
+            if (statView != null) {
+                View card = statView;
+                if (id == R.id.tvHighscoreContent) {
+                    card = (View) statView.getParent().getParent();
+                }
+                Animation slideOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_right);
+                card.startAnimation(slideOut);
+            }
+        }
+        // Delay finish to allow animation
+        new android.os.Handler().postDelayed(super::onBackPressed, 600);
     }
 
     @Override

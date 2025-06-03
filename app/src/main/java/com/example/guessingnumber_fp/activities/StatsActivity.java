@@ -13,6 +13,9 @@ import android.widget.TextView;
 import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.database.GameDataManager;
 import com.example.guessingnumber_fp.activities.SoundManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import androidx.cardview.widget.CardView;
 
 import java.util.Map;
 
@@ -83,6 +86,35 @@ public class StatsActivity extends BaseActivity {
             isNavigatingWithinApp = true;
             finish();
         });
+
+        // Animate all cards and headers in
+        int[] cardIds = new int[] {
+            R.id.tvGamesPlayed, R.id.tvGamesWon, R.id.tvGamesLost, R.id.tvHintsUsed, R.id.tvWinRate, R.id.tvBestScore
+        };
+        int[] headerIds = new int[] {
+            R.id.tvGameStatsTitle, R.id.tvPerformanceSubtitle, R.id.spinnerDifficulty
+        };
+        // Animate cards sequentially
+        for (int i = 0; i < cardIds.length; i++) {
+            View statView = findViewById(cardIds[i]);
+            if (statView != null) {
+                View card = (View) statView.getParent().getParent(); // TextView -> LinearLayout -> CardView
+                card.setAlpha(0f);
+                card.postDelayed(() -> {
+                    Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+                    card.setAlpha(1f);
+                    card.startAnimation(slideIn);
+                }, i * 100);
+            }
+        }
+        // Animate headers and spinner as before
+        for (int id : headerIds) {
+            View statView = findViewById(id);
+            if (statView != null) {
+                Animation slideIn = AnimationUtils.loadAnimation(this, R.anim.slide_in_left);
+                statView.startAnimation(slideIn);
+            }
+        }
     }
 
     /**
@@ -143,9 +175,21 @@ public class StatsActivity extends BaseActivity {
     }
     @Override
     public void onBackPressed() {
-        isNavigatingWithinApp = true;
-        isInGameFlow = false;
-        super.onBackPressed();
+        // Animate all cards and headers out
+        int[] viewIds = new int[] {
+            R.id.tvGamesPlayed, R.id.tvGamesWon, R.id.tvGamesLost, R.id.tvHintsUsed, R.id.tvWinRate, R.id.tvBestScore,
+            R.id.tvGameStatsTitle, R.id.tvPerformanceSubtitle, R.id.spinnerDifficulty
+        };
+        for (int id : viewIds) {
+            View statView = findViewById(id);
+            if (statView != null) {
+                View card = (View) statView.getParent().getParent();
+                Animation slideOut = AnimationUtils.loadAnimation(this, R.anim.slide_out_right);
+                card.startAnimation(slideOut);
+            }
+        }
+        // Delay finish to allow animation
+        new android.os.Handler().postDelayed(super::onBackPressed, 600);
     }
 
 }

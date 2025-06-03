@@ -2,7 +2,10 @@ package com.example.guessingnumber_fp.activities;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import com.example.guessingnumber_fp.R;
 
 public class HelpActivity extends BaseActivity {
@@ -23,5 +26,9 @@ public class HelpActivity extends BaseActivity {
             }
             finish();
         });
+
+        LinearLayout helpCard = findViewById(R.id.helpCard);
+        Animation slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
+        helpCard.startAnimation(slideUp);
     }
 } 

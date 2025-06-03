@@ -25,11 +25,18 @@ public class MainActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = getIntent();
+        boolean showSelectDifficulty = intent != null && intent.getBooleanExtra("show_select_difficulty", false);
+
         if (savedInstanceState == null) {
-            getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, new MainMenuFragment())
-                .commit();
+            if (showSelectDifficulty) {
+                showSelectDifficultyFragment();
+            } else {
+                getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.fragment_container, new MainMenuFragment())
+                    .commit();
+            }
         }
 
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
@@ -123,5 +130,14 @@ public class MainActivity extends BaseActivity {
             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out)
             .replace(R.id.fragment_container, new MainMenuFragment())
             .commit();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        if (intent != null && intent.getBooleanExtra("show_select_difficulty", false)) {
+            showSelectDifficultyFragment();
+        }
     }
 }

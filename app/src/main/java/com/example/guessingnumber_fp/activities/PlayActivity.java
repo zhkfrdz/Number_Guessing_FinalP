@@ -199,9 +199,11 @@ public class PlayActivity extends BaseActivity {
                 // If button says "Back to Menu", just go back to the difficulty selection screen
                 isNavigatingWithinApp = true;
                 isInGameFlow = false;
-                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("show_select_difficulty", true);
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             } else {
                 // Play give up button sound
@@ -807,9 +809,11 @@ public class PlayActivity extends BaseActivity {
                 dialog.dismiss();
                 isNavigatingWithinApp = true;
                 isInGameFlow = false;
-                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("show_select_difficulty", true);
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             });
             dialog.show();
@@ -837,7 +841,9 @@ public class PlayActivity extends BaseActivity {
             isInGameFlow = false;
             Intent intent = new Intent(this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("show_select_difficulty", true);
             startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
             return;
         }
@@ -1000,9 +1006,11 @@ public class PlayActivity extends BaseActivity {
                     resultDialog.dismiss();
                     isNavigatingWithinApp = true;
                     isInGameFlow = false;
-                    Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                    Intent intent = new Intent(this, MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("show_select_difficulty", true);
                     startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                     finish();
                 });
                 
@@ -1010,9 +1018,11 @@ public class PlayActivity extends BaseActivity {
             } else {
                 isNavigatingWithinApp = true;
                 isInGameFlow = false;
-                Intent intent = new Intent(this, SelectDifficultyActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("show_select_difficulty", true);
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             }
         });
