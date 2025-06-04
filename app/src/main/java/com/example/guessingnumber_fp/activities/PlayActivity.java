@@ -113,7 +113,7 @@ public class PlayActivity extends BaseActivity {
                 maxHearts = 3;
             } else if ("medium".equals(difficulty)) {
                 difficultyMax = 30;
-                hints = 5;
+                hints = 4;
                 hearts = 4;
                 maxHearts = 4;
             } else if ("hard".equals(difficulty)) {
@@ -384,7 +384,7 @@ public class PlayActivity extends BaseActivity {
         if ("easy".equals(difficulty)) {
             hints = 3;
         } else if ("medium".equals(difficulty)) {
-            hints = 5;
+            hints = 4;
         } else if ("hard".equals(difficulty)) {
             hints = 5;
         } else if ("impossible".equals(difficulty)) {
@@ -1192,7 +1192,7 @@ public class PlayActivity extends BaseActivity {
             iconResource = R.drawable.easy;
         } else if ("medium".equals(difficulty)) {
             messageTitle = "MEDIUM MODE";
-            messageContent = "• Start with 5 hints\n• Earn +1 hint for every 2 correct guesses";
+            messageContent = "• Start with 4 hints\n• Earn +1 hint for every 2 correct guesses";
             iconResource = R.drawable.medium;
         } else if ("hard".equals(difficulty)) {
             messageTitle = "HARD MODE";
