@@ -16,6 +16,7 @@ import com.example.guessingnumber_fp.activities.SoundManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import androidx.cardview.widget.CardView;
+import android.os.Build;
 
 import java.util.Map;
 
@@ -27,6 +28,17 @@ public class StatsActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stats);
+
+        // Make the app full screen with immersive mode
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
 
         SharedPreferences prefs = getSharedPreferences("game_data", MODE_PRIVATE);
         dataManager = GameDataManager.getInstance(this);
@@ -117,6 +129,21 @@ public class StatsActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Re-enable immersive mode on resume
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
     /**
      * Display statistics from SharedPreferences (legacy method)
      */
@@ -175,6 +202,9 @@ public class StatsActivity extends BaseActivity {
     }
     @Override
     public void onBackPressed() {
+        // Play back button sound
+        SoundManager.playSound(this, R.raw.cat_back_btn);
+        
         // Animate all cards and headers out
         int[] viewIds = new int[] {
             R.id.tvGamesPlayed, R.id.tvGamesWon, R.id.tvGamesLost, R.id.tvHintsUsed, R.id.tvWinRate, R.id.tvBestScore,

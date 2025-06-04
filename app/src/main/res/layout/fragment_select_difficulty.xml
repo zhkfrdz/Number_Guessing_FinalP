@@ -16,9 +16,10 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:src="@drawable/ic_arrow_back"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/circle_orange"
             android:contentDescription="Back"
             android:layout_gravity="start"
+            android:elevation="4dp"
             android:tint="#FFFFFF"
             android:layout_marginTop="8dp"/>
 

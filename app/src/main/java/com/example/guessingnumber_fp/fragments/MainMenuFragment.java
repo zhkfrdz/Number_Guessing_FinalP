@@ -16,6 +16,7 @@ import com.example.guessingnumber_fp.activities.HighscoresActivity;
 import com.example.guessingnumber_fp.activities.StatsActivity;
 import com.example.guessingnumber_fp.activities.SettingsActivity;
 import com.example.guessingnumber_fp.activities.HelpActivity;
+import com.example.guessingnumber_fp.activities.SoundManager;
 
 public class MainMenuFragment extends Fragment {
     @Nullable
@@ -30,45 +31,25 @@ public class MainMenuFragment extends Fragment {
         MaterialButton btnQuit = view.findViewById(R.id.btnQuit);
 
         btnPlay.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).showSelectDifficultyFragment();
             }
         });
         btnHighscores.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startActivity(new Intent(getActivity(), HighscoresActivity.class));
         });
         btnStats.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startActivity(new Intent(getActivity(), StatsActivity.class));
         });
         btnSettings.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startActivity(new Intent(getActivity(), SettingsActivity.class));
         });
         btnHelp.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startActivity(new Intent(getActivity(), HelpActivity.class));
         });
         btnQuit.setOnClickListener(v -> {

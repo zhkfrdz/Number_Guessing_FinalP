@@ -12,6 +12,7 @@ import com.example.guessingnumber_fp.R;
 import com.example.guessingnumber_fp.activities.MainActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import android.media.MediaPlayer;
+import com.example.guessingnumber_fp.activities.SoundManager;
 
 public class SelectDifficultyFragment extends Fragment {
     @Nullable
@@ -21,11 +22,7 @@ public class SelectDifficultyFragment extends Fragment {
         ImageButton btnBack = view.findViewById(R.id.btnBack);
         btnBack.setOnClickListener(v -> {
             if (getActivity() != null) {
-                MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_back_btn);
-                if (player != null) {
-                    player.setOnCompletionListener(MediaPlayer::release);
-                    player.start();
-                }
+                SoundManager.playSound(getActivity(), R.raw.cat_back_btn);
             }
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).showMainMenuFragment();
@@ -38,35 +35,19 @@ public class SelectDifficultyFragment extends Fragment {
         View cardImpossible = view.findViewById(R.id.cardImpossible);
 
         cardEasy.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startGame("easy", 10);
         });
         cardMedium.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startGame("medium", 30);
         });
         cardHard.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startGame("hard", 50);
         });
         cardImpossible.setOnClickListener(v -> {
-            MediaPlayer player = MediaPlayer.create(getActivity(), R.raw.cat_buttons);
-            if (player != null) {
-                player.setOnCompletionListener(MediaPlayer::release);
-                player.start();
-            }
+            SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startGame("impossible", 100);
         });
 

@@ -53,7 +53,7 @@
                 android:layout_height="36dp"
                 android:layout_marginStart="12dp"
                 android:src="@drawable/heart" />
-                
+
             <ImageView
                 android:id="@+id/heart4"
                 android:layout_width="36dp"
@@ -61,7 +61,7 @@
                 android:layout_marginStart="12dp"
                 android:src="@drawable/heart"
                 android:visibility="gone" />
-                
+
             <ImageView
                 android:id="@+id/heart5"
                 android:layout_width="36dp"
@@ -69,7 +69,7 @@
                 android:layout_marginStart="12dp"
                 android:src="@drawable/heart"
                 android:visibility="gone" />
-                
+
             <ImageView
                 android:id="@+id/heart6"
                 android:layout_width="36dp"
@@ -81,13 +81,14 @@
 
         <ImageView
             android:id="@+id/imgCats"
-            android:layout_width="180dp"
-            android:layout_height="180dp"
+            android:layout_width="334dp"
+            android:layout_height="311dp"
             android:layout_marginTop="16dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/play"
-            app:layout_constraintTop_toBottomOf="@id/heartsContainer"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/heartsContainer" />
 
         <TextView
             android:id="@+id/tvRange"
@@ -186,14 +187,14 @@
 
         <Button
             android:id="@+id/btnGiveUp"
-            style="@style/Widget.MaterialComponents.Button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:backgroundTint="#FF6B4A"
+            android:backgroundTint="#FFFFFF"
             android:fontFamily="@font/poppins_medium"
             android:text="Back to Menu"
-            android:textColor="#fff"
+            android:textColor="#FF6B4A"
             android:textSize="20sp"
             app:cornerRadius="30dp"
             android:foreground="@drawable/ripple_grey"
@@ -218,9 +219,8 @@
 
         <TextView
             android:id="@+id/tvHintMessage"
-            android:layout_width="165dp"
-            android:layout_height="130dp"
-            android:layout_marginEnd="4dp"
+            android:layout_width="192dp"
+            android:layout_height="151dp"
             android:layout_marginBottom="6dp"
             android:background="@drawable/bubble"
             android:fontFamily="@font/poppins_medium"
@@ -230,12 +230,12 @@
             android:padding="20dp"
             android:textAlignment="center"
             android:textColor="#000000"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="@id/imgCats"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/heartsContainer"
-            app:layout_constraintVertical_bias="0.349" />
+            app:layout_constraintVertical_bias="0.245" />
 
         <ImageButton
             android:id="@+id/btnHintInfo"
@@ -250,6 +250,19 @@
             app:layout_constraintBottom_toBottomOf="@id/tvHint"
             app:layout_constraintStart_toEndOf="@id/tvHint"
             app:layout_constraintTop_toTopOf="@id/tvHint" />
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/circle_orange"
+            android:src="@drawable/ic_arrow_back"
+            android:contentDescription="Back"
+            android:elevation="4dp"
+            android:tint="#FFFFFF"
+            android:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

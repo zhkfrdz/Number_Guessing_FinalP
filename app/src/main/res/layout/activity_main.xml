@@ -1,7 +1,143 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/fragment_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000" />
+    android:background="#000000">
+
+    <!-- Background Pattern -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/pattern_bg"
+        android:alpha="0.1"
+        android:scaleType="centerCrop"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:gravity="center">
+
+        <!-- Game Logo -->
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/play"
+            android:layout_marginBottom="32dp"
+            android:elevation="8dp"/>
+
+        <!-- Game Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="NUMBER GUESSER"
+            android:textColor="#FFFFFF"
+            android:textSize="36sp"
+            android:fontFamily="@font/audiowide"
+            android:layout_marginBottom="8dp"
+            android:elevation="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Test your intuition!"
+            android:textColor="#FF6B4A"
+            android:textSize="18sp"
+            android:fontFamily="@font/poppins_medium"
+            android:layout_marginBottom="48dp"/>
+
+        <!-- Menu Buttons Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <!-- Play Button -->
+            <Button
+                android:id="@+id/btnPlay"
+                android:layout_width="280dp"
+                android:layout_height="60dp"
+                android:text="PLAY"
+                android:textSize="20sp"
+                android:fontFamily="@font/audiowide"
+                android:backgroundTint="#FF6B4A"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="30dp"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Highscores Button -->
+            <Button
+                android:id="@+id/btnHighscores"
+                android:layout_width="280dp"
+                android:layout_height="60dp"
+                android:text="HIGHSCORES"
+                android:textSize="20sp"
+                android:fontFamily="@font/audiowide"
+                android:backgroundTint="#FF6B4A"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="30dp"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Stats Button -->
+            <Button
+                android:id="@+id/btnStats"
+                android:layout_width="280dp"
+                android:layout_height="60dp"
+                android:text="STATS"
+                android:textSize="20sp"
+                android:fontFamily="@font/audiowide"
+                android:backgroundTint="#FF6B4A"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="30dp"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Settings Button -->
+            <Button
+                android:id="@+id/btnSettings"
+                android:layout_width="280dp"
+                android:layout_height="60dp"
+                android:text="SETTINGS"
+                android:textSize="20sp"
+                android:fontFamily="@font/audiowide"
+                android:backgroundTint="#FF6B4A"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="30dp"
+                android:elevation="4dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Help Button -->
+            <Button
+                android:id="@+id/btnHelp"
+                android:layout_width="280dp"
+                android:layout_height="60dp"
+                android:text="HELP"
+                android:textSize="20sp"
+                android:fontFamily="@font/audiowide"
+                android:backgroundTint="#FF6B4A"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="30dp"
+                android:elevation="4dp"/>
+
+        </LinearLayout>
+
+        <!-- Version Text -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v1.0.0"
+            android:textColor="#666666"
+            android:textSize="14sp"
+            android:fontFamily="@font/poppins"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+
+</FrameLayout>

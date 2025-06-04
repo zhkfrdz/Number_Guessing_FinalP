@@ -9,10 +9,13 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 import com.example.guessingnumber_fp.R;
+import android.os.Build;
 
 public class PlayActivity extends BaseActivity {
     int targetNumber, score = 0, hearts = 3, maxHearts = 3, hints = 3, difficultyMax = 50;
@@ -32,16 +35,21 @@ public class PlayActivity extends BaseActivity {
     private final String[] tooLowMessages = {
             "Wow, aiming that low? Are you even trying?",
             "That's cute. Add some digits, maybe you'll get close.",
-            "This isn't limbo, you don't have to go that low.",
+            "This isn't basement, too low.",
             "Did you guess with your eyes closed?",
-            "Colder than your last relationship. Try higher."
+            "Colder than your last relationship. Try higher.",
+            "This ain't your grade buddy.",
+            "Did you guess in the coffin?"
     };
 
     private final String[] tooHighMessages = {
             "Relax, it's not your ego. Go lower.",
             "That number is as inflated as your confidence.",
             "Trying to touch the sun, are we? Bring it down.",
-            "You overshot it like your life goals."
+            "You overshot it like your life goals.",
+            "You expect high huh? That's why you get hurt.",
+            "Wow the numbers are flying, you ain't a bird.",
+            "You ain't him buddy! Go lower."
     };
 
     TextView tvLevel, tvRange, tvHint, tvHintMessage;
@@ -59,11 +67,30 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
+            // Make the app full screen with immersive mode
+            requestWindowFeature(Window.FEATURE_NO_TITLE);
+            
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            }
+            
             super.onCreate(savedInstanceState);
+            
             if (getSupportActionBar() != null) {
                 getSupportActionBar().hide();
             }
-            getWindow().setStatusBarColor(0xFF000000);
+            
+            // Set black status bar color in immersive mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                getWindow().setStatusBarColor(0xFF000000);
+            }
+            
             setContentView(R.layout.activity_play);
 
             // Initialize background music for play activity
@@ -177,6 +204,41 @@ public class PlayActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        // Play back button sound directly
+        MediaPlayer backBtnPlayer = MediaPlayer.create(this, R.raw.cat_back_btn);
+        if (backBtnPlayer != null) {
+            backBtnPlayer.setLooping(false);
+            backBtnPlayer.setOnCompletionListener(mp -> mp.release());
+            backBtnPlayer.start();
+        }
+        
+        // Go back to SelectDifficultyFragment
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("show_select_difficulty", true);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNavigatingWithinApp = false;
+        startLevelMusic();
+        
+        // Re-enable immersive mode on resume
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
+
     private void setupClickListeners() {
         btnGuess.setOnClickListener(v -> {
             if (isSoundOn()) {
@@ -277,22 +339,6 @@ public class PlayActivity extends BaseActivity {
         btnHintInfo.setOnClickListener(v -> {
             showHintInfoDialog();
         });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        // Only pause if we're not navigating within the app
-        if (!isNavigatingWithinApp) {
-            MusicManager.pause();
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isNavigatingWithinApp = false;
-        startLevelMusic();
     }
 
     @Override
@@ -400,15 +446,19 @@ public class PlayActivity extends BaseActivity {
     private String getRoastMessage() {
         String[] roasts = {
                 "Try counting on your fingers!",
-                "Math isn't your thing, huh?",
+                "Numbers isn't your thing, huh?",
                 "Guessing with eyes closed?",
                 "Need more help?",
                 "Try easier mode next time!",
-                "Calculator needed!",
+                "Hint Expert!",
                 "Guessing champion...",
                 "Interesting strategy...",
                 "Random number generator!",
-                "My grandma guesses better!"
+                "My grandma guesses better!",
+                "Ground level IQ!",
+                "Do you hear that? *dumbmeow....",
+                "You're cooked.",
+                "Should I make a tutorial just for you?"
         };
         return roasts[random.nextInt(roasts.length)];
     }
