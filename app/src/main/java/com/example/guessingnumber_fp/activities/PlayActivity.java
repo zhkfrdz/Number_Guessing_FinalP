@@ -16,6 +16,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Random;
 import com.example.guessingnumber_fp.R;
 import android.os.Build;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.CycleInterpolator;
+import android.animation.ObjectAnimator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.Animator;
 
 public class PlayActivity extends BaseActivity {
     int targetNumber, score = 0, hearts = 3, maxHearts = 3, hints = 3, difficultyMax = 50;
@@ -63,6 +69,14 @@ public class PlayActivity extends BaseActivity {
     SharedPreferences prefs;
 
     private String originalRangeMessage;
+
+    private ImageView walkingCat;
+    private int currentCatFrame = 1;
+    private final Handler catAnimationHandler = new Handler();
+    private final int[] catFrames = {
+        R.drawable.c1, R.drawable.c2, R.drawable.c3, R.drawable.c4,
+        R.drawable.c5, R.drawable.c6, R.drawable.c7, R.drawable.c8
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -188,6 +202,7 @@ public class PlayActivity extends BaseActivity {
             btnHint = findViewById(R.id.btnHintButton);
             btnTryAgain = findViewById(R.id.btnTryAgain);
             btnHintInfo = findViewById(R.id.btnHintInfo);
+            walkingCat = findViewById(R.id.walkingCat);
 
             // Essential components that must not be null
             if (etGuess == null || btnGuess == null) {
@@ -198,6 +213,7 @@ public class PlayActivity extends BaseActivity {
             if (tvHint != null) tvHint.setText("HINTS: " + hints);
             if (tvRange != null) tvRange.setText("We are thinking of a number between 1 and " + difficultyMax);
             if (btnTryAgain != null) btnTryAgain.setVisibility(View.GONE);
+            if (walkingCat != null) walkingCat.setVisibility(View.GONE);
         } catch (Exception e) {
             Toast.makeText(this, "Error initializing UI: " + e.getMessage(), Toast.LENGTH_LONG).show();
             throw e; // Re-throw to be caught by onCreate
@@ -214,9 +230,10 @@ public class PlayActivity extends BaseActivity {
             backBtnPlayer.start();
         }
         
-        // Go back to SelectDifficultyFragment
+        // Go back to SelectDifficultyFragment with animation flag
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("show_select_difficulty", true);
+        intent.putExtra("animate_cards", true);
         startActivity(intent);
         finish();
     }
@@ -350,7 +367,11 @@ public class PlayActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Do NOT stop or release music here
+        // Clean up cat animation
+        catAnimationHandler.removeCallbacksAndMessages(null);
+        if (walkingCat != null) {
+            walkingCat.setVisibility(View.GONE);
+        }
     }
 
     private boolean isSoundOn() {
@@ -609,6 +630,9 @@ public class PlayActivity extends BaseActivity {
         hearts = maxHearts;
         updateHearts();
         correctGuessCounter++;
+
+        // Start walking cat animation
+        startWalkingCatAnimation();
 
         // Add hints based on difficulty and correct guess counter
         if ("easy".equals(difficulty) && correctGuessCounter >= 3) {
@@ -1047,20 +1071,86 @@ public class PlayActivity extends BaseActivity {
     }
 
     private void updateHearts() {
-        heart1.setImageResource(hearts >= 1 ? R.drawable.heart : R.drawable.empty_heart);
-        heart2.setImageResource(hearts >= 2 ? R.drawable.heart : R.drawable.empty_heart);
-        heart3.setImageResource(hearts >= 3 ? R.drawable.heart : R.drawable.empty_heart);
+        ImageView[] heartViews = {heart1, heart2, heart3, heart4, heart5, heart6};
+        int maxVisible = maxHearts;
 
-        // Only update additional hearts if they're visible for this difficulty
-        if (heart4 != null && heart4.getVisibility() == View.VISIBLE) {
-            heart4.setImageResource(hearts >= 4 ? R.drawable.heart : R.drawable.empty_heart);
+        for (int i = 0; i < heartViews.length; i++) {
+            if (heartViews[i] != null) {
+                if (i < maxVisible) {
+                    heartViews[i].setVisibility(View.VISIBLE);
+                    if (i >= hearts) {
+                        // Only play loss animation if the heart was just lost
+                        if (heartViews[i].getTag() == null || !heartViews[i].getTag().equals("empty")) {
+                            playHeartLossAnimation(heartViews[i]);
+                            heartViews[i].setTag("empty");
+                        }
+                    } else {
+                        heartViews[i].setImageResource(R.drawable.heart);
+                        heartViews[i].setTag("full");
+                    }
+                } else {
+                    heartViews[i].setVisibility(View.GONE);
+                }
+            }
         }
-        if (heart5 != null && heart5.getVisibility() == View.VISIBLE) {
-            heart5.setImageResource(hearts >= 5 ? R.drawable.heart : R.drawable.empty_heart);
-        }
-        if (heart6 != null && heart6.getVisibility() == View.VISIBLE) {
-            heart6.setImageResource(hearts >= 6 ? R.drawable.heart : R.drawable.empty_heart);
-        }
+    }
+
+    private void startWalkingCatAnimation() {
+        if (walkingCat == null) return;
+        
+        walkingCat.setVisibility(View.VISIBLE);
+        walkingCat.setX(-walkingCat.getWidth()); // Start off screen
+        currentCatFrame = 0;
+
+        final float screenWidth = getResources().getDisplayMetrics().widthPixels;
+        final long animationDuration = 3000; // 3 seconds
+        final long frameInterval = 100; // 100ms per frame
+        final float distancePerFrame = (screenWidth + walkingCat.getWidth()) / (animationDuration / frameInterval);
+
+        Runnable animationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                // Update cat position
+                walkingCat.setX(walkingCat.getX() + distancePerFrame);
+
+                // Update cat frame
+                walkingCat.setImageResource(catFrames[currentCatFrame]);
+                currentCatFrame = (currentCatFrame + 1) % catFrames.length;
+
+                // Continue animation if cat hasn't reached the end
+                if (walkingCat.getX() < screenWidth) {
+                    catAnimationHandler.postDelayed(this, frameInterval);
+                } else {
+                    walkingCat.setVisibility(View.GONE);
+                }
+            }
+        };
+
+        catAnimationHandler.post(animationRunnable);
+    }
+
+    private void playHeartLossAnimation(ImageView heart) {
+        if (heart == null) return;
+
+        // First set the heartloss image
+        heart.setImageResource(R.drawable.heartloss);
+
+        // Create shake animation using TranslateAnimation instead
+        Animation shakeAnimation = AnimationUtils.loadAnimation(this, R.anim.shake_animation);
+        shakeAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                heart.setImageResource(R.drawable.empty_heart);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+
+        heart.startAnimation(shakeAnimation);
     }
 
     @Override
