@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -260,5 +262,30 @@ public class StatsDAO {
         close();
         
         return result > 0;
+    }
+    
+    /**
+     * Get all unique usernames from the stats table
+     * @return List of usernames
+     */
+    public List<String> getAllUsers() {
+        List<String> users = new ArrayList<>();
+        
+        String query = "SELECT DISTINCT " + GameDatabaseHelper.COLUMN_USERNAME + 
+                      " FROM " + GameDatabaseHelper.TABLE_STATS;
+        
+        Cursor cursor = database.rawQuery(query, null);
+        
+        if (cursor.moveToFirst()) {
+            do {
+                String username = cursor.getString(0);
+                if (username != null && !username.isEmpty()) {
+                    users.add(username);
+                }
+            } while (cursor.moveToNext());
+        }
+        
+        cursor.close();
+        return users;
     }
 }

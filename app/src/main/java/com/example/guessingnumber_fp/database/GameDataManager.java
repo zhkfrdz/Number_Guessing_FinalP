@@ -8,8 +8,10 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * GameDataManager provides a unified interface for data storage operations
@@ -456,5 +458,56 @@ public class GameDataManager {
         }
         
         return results;
+    }
+    
+    /**
+     * Get all users from the database or SharedPreferences
+     * @return List of usernames
+     */
+    public List<String> getAllUsers() {
+        List<String> users = new ArrayList<>();
+        
+        // If using SQLite, get users from database
+        if (currentMode == MODE_SQLITE || currentMode == MODE_DUAL) {
+            try {
+                initDatabaseIfNeeded();
+                openDatabase();
+                
+                // Use StatsDAO to get all users
+                StatsDAO statsDAO = new StatsDAO(context);
+                statsDAO.open();
+                users = statsDAO.getAllUsers();
+                statsDAO.close();
+                
+                closeDatabase();
+            } catch (Exception e) {
+                Log.e(TAG, "Error getting users from SQLite: " + e.getMessage());
+                // Fall back to SharedPreferences if there was an error
+            }
+        }
+        
+        // If using SharedPreferences or if SQLite failed, get users from SharedPreferences
+        if ((currentMode == MODE_SHARED_PREFS || currentMode == MODE_DUAL) && users.isEmpty()) {
+            Map<String, ?> allEntries = prefs.getAll();
+            Set<String> uniqueUsers = new HashSet<>();
+            
+            // Collect all unique usernames from various keys
+            for (String key : allEntries.keySet()) {
+                if (key.contains("_")) {
+                    String[] parts = key.split("_");
+                    if (parts.length >= 2) {
+                        // Get the last part which should be the username
+                        String username = parts[parts.length - 1];
+                        if (!username.equals("user")) {  // Skip the special "user" key
+                            uniqueUsers.add(username);
+                        }
+                    }
+                }
+            }
+            
+            users.addAll(uniqueUsers);
+        }
+        
+        return users;
     }
 }

@@ -15,6 +15,9 @@ public class HintManagerNew {
     private static final List<Integer> recentlyUsedHints = new ArrayList<>();
     private static final int MAX_RECENT_HINTS = 3; // Don't repeat the last 3 hint types
     
+    // Track the user's last guess for mathematical hints
+    private static int lastUserGuess = 0;
+    
     // Difficulty level ranges
     public static final int EASY_MAX = 10;
     public static final int MEDIUM_MAX = 30;
@@ -30,30 +33,43 @@ public class HintManagerNew {
      * @return A user-friendly hint message
      */
     public static String generateHint(int targetNumber, int difficultyMax, String difficulty) {
-        // Get valid hint types for this target number and difficulty
         List<Integer> validHintTypes = getValidHintTypes(difficultyMax, targetNumber);
-        
-        // Remove recently used hint types to avoid repetition
+        // If "impossible" difficulty, restrict to only the hardest hint types
+        if ("impossible".equalsIgnoreCase(difficulty)) {
+            // Only allow: 7 (sum of digits), 8 (digit relationship), 9 (prime/composite), 11 (math riddle)
+            List<Integer> impossibleHintTypes = new ArrayList<>();
+            if (validHintTypes.contains(7)) impossibleHintTypes.add(7);
+            if (validHintTypes.contains(8)) impossibleHintTypes.add(8);
+            if (validHintTypes.contains(9)) impossibleHintTypes.add(9);
+            if (validHintTypes.contains(11)) impossibleHintTypes.add(11);
+            // Fallback to all if none (shouldn't happen)
+            if (impossibleHintTypes.isEmpty()) impossibleHintTypes = new ArrayList<>(validHintTypes);
+            // Remove recently used hint types
+            List<Integer> availableHintTypes = new ArrayList<>(impossibleHintTypes);
+            availableHintTypes.removeAll(recentlyUsedHints);
+            if (availableHintTypes.size() < 1) {
+                availableHintTypes = new ArrayList<>(impossibleHintTypes);
+            }
+            int randomIndex = random.nextInt(availableHintTypes.size());
+            int selectedHintType = availableHintTypes.get(randomIndex);
+            recentlyUsedHints.add(selectedHintType);
+            if (recentlyUsedHints.size() > MAX_RECENT_HINTS) {
+                recentlyUsedHints.remove(0);
+            }
+            return generateHintByType(selectedHintType, targetNumber, difficultyMax);
+        }
+        // --- Default logic for other difficulties ---
         List<Integer> availableHintTypes = new ArrayList<>(validHintTypes);
         availableHintTypes.removeAll(recentlyUsedHints);
-        
-        // If we've filtered out too many hint types, use all valid types
-        // This ensures we always have at least one hint available
         if (availableHintTypes.size() < 2) {
             availableHintTypes = new ArrayList<>(validHintTypes);
         }
-        
-        // Select a random hint type from the available ones
         int randomIndex = random.nextInt(availableHintTypes.size());
         int selectedHintType = availableHintTypes.get(randomIndex);
-        
-        // Update the recently used hints list
         recentlyUsedHints.add(selectedHintType);
         if (recentlyUsedHints.size() > MAX_RECENT_HINTS) {
-            recentlyUsedHints.remove(0); // Remove the oldest hint
+            recentlyUsedHints.remove(0);
         }
-        
-        // Generate the hint based on the selected type
         return generateHintByType(selectedHintType, targetNumber, difficultyMax);
     }
     
@@ -101,11 +117,16 @@ public class HintManagerNew {
             validTypes.add(9);
         }
         
-        // Hint type 10: Comparison to average - always valid (renumbered from 12)
+        // Hint type 10: Comparison to average - always valid
         validTypes.add(10);
         
-        // Hint type 11: Math riddle hint - always valid (renumbered from 13)
+        // Hint type 11: Math riddle hint - always valid
         validTypes.add(11);
+        
+        // Hint type 12: Mathematical equation hint - only valid if we have a previous guess
+        if (lastUserGuess > 0) {
+            validTypes.add(12);
+        }
         
         return validTypes;
     }
@@ -199,6 +220,10 @@ public class HintManagerNew {
             case 11:
                 // Math riddle hint
                 return generateMathRiddle(targetNumber);
+                
+            case 12:
+                // Mathematical equation hint
+                return generateMathEquationHint(targetNumber);
                 
             default:
                 // Fallback hint
@@ -328,33 +353,133 @@ public class HintManagerNew {
      * Generate a math riddle hint
      */
     private static String generateMathRiddle(int targetNumber) {
-        int riddleType = random.nextInt(5);
+        // For impossible mode, use only complex riddles
+        if (targetNumber > 50) { // Impossible mode (1-100)
+            int riddleType = random.nextInt(5);
+            
+            switch (riddleType) {
+                case 0: // Complex addition with multiple steps
+                    int addend1 = random.nextInt(10) + 1;
+                    int addend2 = random.nextInt(10) + 1;
+                    return String.format("If you add %d, then add %d more, you get %d", 
+                        addend1, addend2, targetNumber + addend1 + addend2);
+                
+                case 1: // Complex multiplication with addition
+                    int multiplier = random.nextInt(5) + 2;
+                    int addend = random.nextInt(10) + 1;
+                    return String.format("If you multiply by %d and add %d, you get %d", 
+                        multiplier, addend, targetNumber * multiplier + addend);
+                
+                case 2: // Square root hint
+                    int square = targetNumber * targetNumber;
+                    return String.format("The square root of %d is this number", square);
+                
+                case 3: // Complex division with remainder
+                    int divisor = random.nextInt(5) + 2;
+                    int remainder = targetNumber % divisor;
+                    int quotient = targetNumber / divisor;
+                    return String.format("When divided by %d, the quotient is %d with remainder %d", 
+                        divisor, quotient, remainder);
+                
+                case 4: // Prime factorization hint
+                    if (isPrime(targetNumber)) {
+                        return "This number is prime and when multiplied by itself gives " + (targetNumber * targetNumber);
+                    } else {
+                        // Find a factor
+                        for (int i = 2; i <= Math.sqrt(targetNumber); i++) {
+                            if (targetNumber % i == 0) {
+                                return String.format("This number is %d times %d", i, targetNumber / i);
+                            }
+                        }
+                        return String.format("This number is not prime and is divisible by %d", 
+                            targetNumber / 2);
+                    }
+                
+                default:
+                    // Fallback to square root hint if something goes wrong
+                    return String.format("The square root of %d is this number", targetNumber * targetNumber);
+            }
+        } else {
+            // Original riddles for other difficulties
+            int riddleType = random.nextInt(5);
+            
+            switch (riddleType) {
+                case 0: // Addition riddle
+                    int addend = random.nextInt(10) + 1;
+                    return "If you add " + addend + " to this number, you get " + (targetNumber + addend);
+                    
+                case 1: // Subtraction riddle
+                    int subtrahend = random.nextInt(10) + 1;
+                    return "If you subtract " + subtrahend + " from this number, you get " + (targetNumber - subtrahend);
+                    
+                case 2: // Multiplication riddle
+                    int multiplier = random.nextInt(5) + 2;
+                    return "If you multiply this number by " + multiplier + ", you get " + (targetNumber * multiplier);
+                    
+                case 3: // Division riddle (only if cleanly divisible)
+                    int divisor = 2;
+                    if (targetNumber % 3 == 0) divisor = 3;
+                    else if (targetNumber % 5 == 0) divisor = 5;
+                    return "If you divide this number by " + divisor + ", you get " + (targetNumber / divisor);
+                    
+                case 4: // Double plus/minus something
+                    int adjustment = random.nextInt(10) + 1;
+                    return "If you double this number and add " + adjustment + ", you get " + (targetNumber * 2 + adjustment);
+                    
+                default:
+                    return "I'm thinking of a number that when doubled equals " + (targetNumber * 2);
+            }
+        }
+    }
+
+    /**
+     * Set the user's last guess for mathematical hints
+     */
+    public static void setLastUserGuess(int guess) {
+        lastUserGuess = guess;
+    }
+
+    /**
+     * Generate a mathematical equation hint based on the user's last guess
+     */
+    private static String generateMathEquationHint(int targetNumber) {
+        if (lastUserGuess <= 0) {
+            return "Make a guess first to get a mathematical hint!";
+        }
         
-        switch (riddleType) {
-            case 0: // Addition riddle
-                int addend = random.nextInt(10) + 1;
-                return "If you add " + addend + " to this number, you get " + (targetNumber + addend);
-                
-            case 1: // Subtraction riddle
-                int subtrahend = random.nextInt(10) + 1;
-                return "If you subtract " + subtrahend + " from this number, you get " + (targetNumber - subtrahend);
-                
-            case 2: // Multiplication riddle
-                int multiplier = random.nextInt(5) + 2;
-                return "If you multiply this number by " + multiplier + ", you get " + (targetNumber * multiplier);
-                
-            case 3: // Division riddle (only if cleanly divisible)
-                int divisor = 2;
-                if (targetNumber % 3 == 0) divisor = 3;
-                else if (targetNumber % 5 == 0) divisor = 5;
-                return "If you divide this number by " + divisor + ", you get " + (targetNumber / divisor);
-                
-            case 4: // Double plus/minus something
-                int adjustment = random.nextInt(10) + 1;
-                return "If you double this number and add " + adjustment + ", you get " + (targetNumber * 2 + adjustment);
-                
+        int difference = targetNumber - lastUserGuess;
+        int absDifference = Math.abs(difference);
+        
+        // Generate a random mathematical operation
+        int operation = random.nextInt(4); // 0: add, 1: subtract, 2: multiply, 3: divide
+        
+        switch (operation) {
+            case 0: // Addition
+                return String.format("If you add %d to your guess, you'll get the number!", absDifference);
+            case 1: // Subtraction
+                if (difference > 0) {
+                    return String.format("If you subtract %d from your guess, you'll get the number!", absDifference);
+                } else {
+                    return String.format("If you add %d to your guess, you'll get the number!", absDifference);
+                }
+            case 2: // Multiplication
+                if (lastUserGuess != 0 && targetNumber % lastUserGuess == 0) {
+                    int multiplier = targetNumber / lastUserGuess;
+                    return String.format("If you multiply your guess by %d, you'll get the number!", multiplier);
+                } else {
+                    // Fallback to addition if multiplication doesn't work well
+                    return String.format("If you add %d to your guess, you'll get the number!", absDifference);
+                }
+            case 3: // Division
+                if (lastUserGuess != 0 && lastUserGuess % targetNumber == 0) {
+                    int divisor = lastUserGuess / targetNumber;
+                    return String.format("If you divide your guess by %d, you'll get the number!", divisor);
+                } else {
+                    // Fallback to addition if division doesn't work well
+                    return String.format("If you add %d to your guess, you'll get the number!", absDifference);
+                }
             default:
-                return "I'm thinking of a number that when doubled equals " + (targetNumber * 2);
+                return String.format("If you add %d to your guess, you'll get the number!", absDifference);
         }
     }
 }

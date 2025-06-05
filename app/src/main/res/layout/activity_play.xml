@@ -156,14 +156,14 @@
                 android:layout_height="60dp"
                 android:layout_weight="1"
                 android:backgroundTint="#FF6B4A"
-                android:fontFamily="@font/poppins_medium"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/audiowide"
+                android:foreground="@drawable/ripple_grey"
                 android:text="Guess"
                 android:textColor="#fff"
                 android:textSize="20sp"
                 app:cornerRadius="30dp"
-                android:foreground="@drawable/ripple_grey"
-                android:clickable="true"
-                android:focusable="true"
                 app:rippleColor="#383838" />
 
             <Button
@@ -171,17 +171,17 @@
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="0dp"
                 android:layout_height="60dp"
+                android:layout_marginStart="12dp"
                 android:layout_weight="1"
                 android:backgroundTint="#FF6B4A"
-                android:fontFamily="@font/poppins_medium"
+                android:clickable="true"
+                android:focusable="true"
+                android:fontFamily="@font/audiowide"
+                android:foreground="@drawable/ripple_grey"
                 android:text="Hint"
                 android:textColor="#fff"
                 android:textSize="20sp"
                 app:cornerRadius="30dp"
-                android:layout_marginStart="12dp"
-                android:foreground="@drawable/ripple_grey"
-                android:clickable="true"
-                android:focusable="true"
                 app:rippleColor="#383838" />
         </LinearLayout>
 
@@ -192,18 +192,18 @@
             android:layout_height="60dp"
             android:layout_weight="1"
             android:backgroundTint="#FFFFFF"
-            android:fontFamily="@font/poppins_medium"
+            android:clickable="true"
+            android:focusable="true"
+            android:fontFamily="@font/audiowide"
+            android:foreground="@drawable/ripple_grey"
             android:text="Back to Menu"
             android:textColor="#FF6B4A"
             android:textSize="20sp"
             app:cornerRadius="30dp"
-            android:foreground="@drawable/ripple_grey"
-            android:clickable="true"
-            android:focusable="true"
-            app:rippleColor="#383838"
-            app:layout_constraintTop_toBottomOf="@id/buttonsContainer"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/buttonsContainer"
+            app:rippleColor="#383838" />
 
         <ImageButton
             android:id="@+id/btnTryAgain"

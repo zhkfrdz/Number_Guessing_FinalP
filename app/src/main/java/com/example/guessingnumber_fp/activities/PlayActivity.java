@@ -113,17 +113,17 @@ public class PlayActivity extends BaseActivity {
                 maxHearts = 3;
             } else if ("medium".equals(difficulty)) {
                 difficultyMax = 30;
-                hints = 4;
+                hints = 3;
                 hearts = 4;
                 maxHearts = 4;
             } else if ("hard".equals(difficulty)) {
                 difficultyMax = 50;
-                hints = 5;
+                hints = 3;
                 hearts = 5;
                 maxHearts = 5;
             } else if ("impossible".equals(difficulty)) {
                 difficultyMax = 100;
-                hints = 5;
+                hints = 3;
                 hearts = 6;
                 maxHearts = 6;
             }
@@ -384,11 +384,11 @@ public class PlayActivity extends BaseActivity {
         if ("easy".equals(difficulty)) {
             hints = 3;
         } else if ("medium".equals(difficulty)) {
-            hints = 4;
+            hints = 3;
         } else if ("hard".equals(difficulty)) {
-            hints = 5;
+            hints = 3;
         } else if ("impossible".equals(difficulty)) {
-            hints = 5;
+            hints = 3;
         }
 
         if (tvHint != null) tvHint.setText("HINTS: " + hints);
@@ -562,6 +562,8 @@ public class PlayActivity extends BaseActivity {
 
             // Store the current guess as previousGuess for future hint comparisons
             previousGuess = guess;
+            // Update the last user guess for mathematical hints
+            HintManagerNew.setLastUserGuess(guess);
 
             String currentUser = prefs.getString("current_user", "guest");
 
@@ -1192,15 +1194,15 @@ public class PlayActivity extends BaseActivity {
             iconResource = R.drawable.easy;
         } else if ("medium".equals(difficulty)) {
             messageTitle = "MEDIUM MODE";
-            messageContent = "• Start with 4 hints\n• Earn +1 hint for every 2 correct guesses";
+            messageContent = "• Start with 3 hints\n• Earn +1 hint for every 2 correct guesses";
             iconResource = R.drawable.medium;
         } else if ("hard".equals(difficulty)) {
             messageTitle = "HARD MODE";
-            messageContent = "• Start with 5 hints\n• Earn +1 hint for every 2 correct guesses";
+            messageContent = "• Start with 3 hints\n• Earn +1 hint for every 2 correct guesses";
             iconResource = R.drawable.hard;
         } else if ("impossible".equals(difficulty)) {
             messageTitle = "IMPOSSIBLE MODE";
-            messageContent = "• Start with 5 hints\n• Earn +1 hint for every correct guess (25% chance)";
+            messageContent = "• Start with 3 hints\n• Earn +1 hint for every correct guess (25% chance)";
             iconResource = R.drawable.impossible;
         }
         // Add small difficulty icon
