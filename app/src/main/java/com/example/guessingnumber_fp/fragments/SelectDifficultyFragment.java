@@ -34,6 +34,19 @@ public class SelectDifficultyFragment extends Fragment {
         View cardHard = view.findViewById(R.id.cardHard);
         View cardImpossible = view.findViewById(R.id.cardImpossible);
 
+        // Sequential slide-in-left animation for cards
+        View[] cards = {cardEasy, cardMedium, cardHard, cardImpossible};
+        for (int i = 0; i < cards.length; i++) {
+            View card = cards[i];
+            card.setAlpha(0f);
+            int delay = i * 120; // 120ms delay between cards
+            card.postDelayed(() -> {
+                card.setAlpha(1f);
+                android.view.animation.Animation slideIn = android.view.animation.AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_left);
+                card.startAnimation(slideIn);
+            }, delay);
+        }
+
         cardEasy.setOnClickListener(v -> {
             SoundManager.playSound(getActivity(), R.raw.cat_buttons);
             startGame("easy", 10);
